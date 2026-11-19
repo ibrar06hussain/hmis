@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Modules\Emergency\Http\Controllers\EmergencyController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
+use App\Modules\Ipd\Http\Controllers\IpdController;
 use App\Modules\Opd\Http\Controllers\OpdQueueController;
 use App\Modules\Patient\Http\Controllers\PatientController;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +50,20 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/appointments/{appointment}/cancel', [OpdQueueController::class, 'cancel'])->name('appointments.cancel');
     });
 
+    Route::prefix('emergency')->name('emergency.')->group(function (): void {
+        Route::get('/', [EmergencyController::class, 'index'])->name('index');
+        Route::post('/triage', [EmergencyController::class, 'store'])->name('triage.store');
+        Route::post('/triage/{triage}/disposition', [EmergencyController::class, 'updateDisposition'])->name('triage.disposition');
+    });
+
+    Route::prefix('ipd')->name('ipd.')->group(function (): void {
+        Route::get('/', [IpdController::class, 'index'])->name('index');
+        Route::post('/admit', [IpdController::class, 'admit'])->name('admit');
+        Route::post('/admissions/{admission}/transfer', [IpdController::class, 'transferBed'])->name('admissions.transfer');
+        Route::post('/admissions/{admission}/discharge', [IpdController::class, 'discharge'])->name('admissions.discharge');
+        Route::post('/beds/{bed}/mark-available', [IpdController::class, 'markBedAvailable'])->name('beds.mark-available');
+    });
+
     Route::prefix('encounters')->name('encounters.')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');
         Route::post('/{encounter}/vitals', [EncounterWorkspaceController::class, 'storeVitals'])->name('vitals.store');
@@ -55,6 +71,7 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/{encounter}/notes/{note}', [EncounterWorkspaceController::class, 'updateNote'])->name('notes.update');
         Route::post('/{encounter}/notes/{note}/sign', [EncounterWorkspaceController::class, 'signNote'])->name('notes.sign');
         Route::post('/{encounter}/notes/{note}/amend', [EncounterWorkspaceController::class, 'amendNote'])->name('notes.amend');
+        Route::post('/{encounter}/diagnoses', [EncounterWorkspaceController::class, 'storeDiagnosis'])->name('diagnoses.store');
         Route::post('/{encounter}/complete', [EncounterWorkspaceController::class, 'complete'])->name('complete');
     });
 });

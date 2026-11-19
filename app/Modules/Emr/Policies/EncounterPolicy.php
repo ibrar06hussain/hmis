@@ -51,6 +51,11 @@ class EncounterPolicy
         return $user->can('emr.note.sign') && $this->view($user, $encounter);
     }
 
+    public function recordDiagnosis(User $user, Encounter $encounter): bool
+    {
+        return $user->can('emr.diagnosis.record') && $this->view($user, $encounter);
+    }
+
     public function complete(User $user, Encounter $encounter): bool
     {
         return ($user->can('emr.note.sign') || $user->can('emr.note.create')) && $this->view($user, $encounter);

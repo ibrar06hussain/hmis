@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleAndPermissionSeeder::class,
             HospitalOrganizationSeeder::class,
+            TerminologySeeder::class,
         ]);
 
         if (config('hmis.demo_mode') || app()->environment('local')) {

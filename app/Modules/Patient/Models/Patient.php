@@ -6,10 +6,13 @@ namespace App\Modules\Patient\Models;
 
 use App\Models\User;
 use App\Modules\Appointments\Models\Appointment;
+use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
+use App\Modules\Emr\Models\EncounterDiagnosis;
 use App\Modules\Emr\Models\PatientAllergy;
 use App\Modules\Emr\Models\VitalSign;
+use App\Modules\Ipd\Models\IpdAdmission;
 use App\Modules\Organization\Models\Facility;
 use App\Modules\Pacs\Models\ImagingStudy;
 use App\Support\CnicNormalizer;
@@ -168,6 +171,21 @@ class Patient extends Model
     public function clinicalNotes(): HasMany
     {
         return $this->hasMany(ClinicalNote::class)->orderByDesc('created_at');
+    }
+
+    public function diagnoses(): HasMany
+    {
+        return $this->hasMany(EncounterDiagnosis::class)->orderByDesc('recorded_at');
+    }
+
+    public function emergencyTriages(): HasMany
+    {
+        return $this->hasMany(EmergencyTriage::class)->orderByDesc('triaged_at');
+    }
+
+    public function ipdAdmissions(): HasMany
+    {
+        return $this->hasMany(IpdAdmission::class)->orderByDesc('admitted_at');
     }
 
     public function allergies(): HasMany

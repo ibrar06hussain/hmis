@@ -115,7 +115,7 @@
             </div>
         @endcan
 
-        <div class="hmis-card p-3">
+        <div class="hmis-card p-3 mb-3">
             <h2 class="h6 fw-bold border-bottom pb-2 mb-2">Recorded Vitals ({{ $encounter->vitalSigns->count() }})</h2>
             @forelse($encounter->vitalSigns as $v)
                 <div class="p-2 mb-2 rounded border {{ $v->is_abnormal ? 'border-danger bg-danger-subtle' : 'bg-light' }} small">
@@ -143,6 +143,69 @@
                 </div>
             @empty
                 <div class="text-muted small py-2">No vital signs recorded in this encounter yet.</div>
+            @endforelse
+        </div>
+
+        {{-- ICD-10 / ICD-11 Coded Diagnoses (Version-Locked Offline Terminology) --}}
+        <div class="hmis-card p-3">
+            <h2 class="h6 fw-bold border-bottom pb-2 mb-2"><i class="bi bi-tags-fill me-2 text-primary"></i>ICD-10 / ICD-11 Diagnoses ({{ $encounter->diagnoses->count() }})</h2>
+
+            @can('recordDiagnosis', $encounter)
+                <form method="POST" action="{{ route('encounters.diagnoses.store', $encounter) }}" class="mb-3 pb-3 border-bottom">
+                    @csrf
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold" for="terminology_code_id">Diagnosis Code (Offline ICD-10 / ICD-11)</label>
+                        <select id="terminology_code_id" name="terminology_code_id" class="form-select form-select-sm" required>
+                            <option value="">Select coded diagnosis...</option>
+                            @foreach($terminologyCodes as $tc)
+                                <option value="{{ $tc->id }}">
+                                    [{{ $tc->coding_system }} {{ $tc->code }}] {{ $tc->display_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small mb-1" for="diagnosis_rank">Rank</label>
+                            <select id="diagnosis_rank" name="diagnosis_rank" class="form-select form-select-sm" required>
+                                <option value="primary">Primary</option>
+                                <option value="secondary">Secondary</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small mb-1" for="clinical_status">Status</label>
+                            <select id="clinical_status" name="clinical_status" class="form-select form-select-sm" required>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="provisional">Provisional</option>
+                                <option value="active">Active</option>
+                                <option value="ruled_out">Ruled Out</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <input type="text" name="clinical_context" class="form-control form-control-sm" placeholder="Optional clinical context (e.g., Anterior wall, Killip II)">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sm btn-primary fw-semibold">Add Coded Diagnosis</button>
+                    </div>
+                </form>
+            @endcan
+
+            @forelse($encounter->diagnoses as $diag)
+                <div class="border rounded p-2 mb-2 small bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge {{ $diag->diagnosis_rank === 'primary' ? 'bg-primary' : 'bg-secondary' }} text-uppercase">{{ $diag->diagnosis_rank }}</span>
+                            <span class="badge bg-dark font-monospace">{{ $diag->coding_system }} {{ $diag->code }}</span>
+                            <span class="badge bg-light text-muted border">v{{ $diag->terminology_version }}</span>
+                        </div>
+                        <span class="text-uppercase small fw-semibold">{{ $diag->clinical_status }}</span>
+                    </div>
+                    <div class="fw-semibold mt-1">{{ $diag->display_name }}</div>
+                    @if($diag->clinical_context)<div class="text-muted">{{ $diag->clinical_context }}</div>@endif
+                </div>
+            @empty
+                <div class="text-muted small py-1">No coded diagnoses recorded yet.</div>
             @endforelse
         </div>
     </div>

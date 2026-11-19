@@ -126,6 +126,9 @@ class PatientController extends Controller
                 'vitalSigns.recordedBy',
                 'clinicalNotes.authorUser',
                 'clinicalNotes.signedBy',
+                'diagnoses.recordedBy',
+                'ipdAdmissions.ward',
+                'ipdAdmissions.bed',
                 'appointments.department',
                 'imagingStudies',
             ]);

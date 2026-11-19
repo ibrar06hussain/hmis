@@ -372,6 +372,30 @@
                     </table>
                 </div>
             </div>
+            <div class="hmis-card p-3 mt-3">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Coded Diagnoses History (ICD-10 / ICD-11)</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>Code</th><th>Version</th><th>Diagnosis</th><th>Rank</th><th>Status</th><th>Recorded (PKT)</th></tr>
+                        </thead>
+                        <tbody>
+                            @forelse($patient->diagnoses as $diag)
+                                <tr>
+                                    <td class="font-monospace fw-semibold">{{ $diag->coding_system }} {{ $diag->code }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ $diag->terminology_version }}</span></td>
+                                    <td>{{ $diag->display_name }}</td>
+                                    <td><span class="badge {{ $diag->diagnosis_rank === 'primary' ? 'bg-primary' : 'bg-secondary' }} text-uppercase">{{ $diag->diagnosis_rank }}</span></td>
+                                    <td class="text-uppercase small">{{ $diag->clinical_status }}</td>
+                                    <td>{{ \App\Support\DateTimeHelper::formatDateTime($diag->recorded_at) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="text-center text-muted py-3">No coded diagnoses recorded yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         @if(auth()->user()->can('emr.note.create') || auth()->user()->can('emr.vitals.record'))
             <div class="col-lg-4">

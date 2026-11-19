@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Modules\Appointments\Http\Controllers\Api\AppointmentApiController;
+use App\Modules\Fhir\Http\Controllers\FhirConditionController;
 use App\Modules\Fhir\Http\Controllers\FhirEncounterController;
 use App\Modules\Fhir\Http\Controllers\FhirPatientController;
 use App\Modules\Patient\Http\Controllers\Api\PatientApiController;
+use App\Modules\Terminology\Http\Controllers\Api\TerminologyApiController;
 use Illuminate\Support\Facades\Route;
 
 // Versioned internal/external REST API
@@ -18,10 +20,13 @@ Route::prefix('v1')->middleware('auth:sanctum')->name('api.v1.')->group(function
     Route::get('/appointments', [AppointmentApiController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [AppointmentApiController::class, 'store'])->name('appointments.store');
     Route::post('/appointments/{appointment}/check-in', [AppointmentApiController::class, 'checkIn'])->name('appointments.check-in');
+
+    Route::get('/terminology/search', [TerminologyApiController::class, 'search'])->name('terminology.search');
 });
 
-// Dedicated HL7 FHIR R4 interoperability surface (baseline Patient & Encounter read)
+// Dedicated HL7 FHIR R4 interoperability surface (baseline Patient, Encounter, Condition read)
 Route::prefix('fhir/r4')->middleware('auth:sanctum')->name('api.fhir.r4.')->group(function (): void {
     Route::get('/Patient/{uuid}', [FhirPatientController::class, 'show'])->name('patient.show');
     Route::get('/Encounter/{uuid}', [FhirEncounterController::class, 'show'])->name('encounter.show');
+    Route::get('/Condition/{uuid}', [FhirConditionController::class, 'show'])->name('condition.show');
 });

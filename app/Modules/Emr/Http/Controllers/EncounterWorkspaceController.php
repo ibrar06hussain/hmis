@@ -15,11 +15,14 @@ use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Services\AllergyService;
 use App\Modules\Emr\Services\ClinicalNoteService;
+use App\Modules\Emr\Services\EncounterDiagnosisService;
 use App\Modules\Emr\Services\VitalSignService;
 use App\Modules\Patient\Models\Patient;
+use App\Modules\Terminology\Services\TerminologySearchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class EncounterWorkspaceController extends Controller
@@ -27,6 +30,8 @@ class EncounterWorkspaceController extends Controller
     public function __construct(
         private readonly VitalSignService $vitalSignService,
         private readonly ClinicalNoteService $clinicalNoteService,
+        private readonly EncounterDiagnosisService $diagnosisService,
+        private readonly TerminologySearchService $terminologySearch,
         private readonly AllergyService $allergyService,
         private readonly AppointmentService $appointmentService,
     ) {}
@@ -44,11 +49,13 @@ class EncounterWorkspaceController extends Controller
             'clinicalNotes.authorUser',
             'clinicalNotes.signedBy',
             'clinicalNotes.supersedesNote',
+            'diagnoses.recordedBy',
         ]);
 
         return view('modules.emr.encounter', [
             'encounter' => $encounter,
             'patient' => $encounter->patient,
+            'terminologyCodes' => $this->terminologySearch->search(null, null, 50),
         ]);
     }
 
@@ -176,5 +183,25 @@ class EncounterWorkspaceController extends Controller
         $allergy = $this->allergyService->record($patient, $request->validated(), $user);
 
         return back()->with('warning', "Allergy to '{$allergy->substance}' ({$allergy->severity}) recorded on patient safety strip.");
+    }
+
+    public function storeDiagnosis(Request $request, Encounter $encounter): RedirectResponse
+    {
+        Gate::authorize('recordDiagnosis', $encounter);
+
+        $validated = $request->validate([
+            'terminology_code_id' => ['required', 'integer', 'exists:terminology_codes,id'],
+            'diagnosis_rank' => ['required', Rule::in(['primary', 'secondary'])],
+            'clinical_status' => ['required', Rule::in(['provisional', 'confirmed', 'active', 'resolved', 'ruled_out'])],
+            'clinical_context' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        /** @var User $user */
+        $user = $request->user();
+        $diagnosis = $this->diagnosisService->record($encounter, $validated, $user);
+
+        return redirect()
+            ->route('encounters.show', $encounter)
+            ->with('status', "Diagnosis {$diagnosis->coding_system} {$diagnosis->code} ({$diagnosis->display_name}) recorded.");
     }
 }

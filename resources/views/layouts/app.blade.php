@@ -56,9 +56,20 @@
                 </a>
             @endcan
 
+            @can('viewAny', \App\Modules\Emergency\Models\EmergencyTriage::class)
+                <a href="{{ route('emergency.index') }}" class="nav-link {{ request()->routeIs('emergency.*') ? 'active' : '' }}">
+                    <i class="bi bi-heart-pulse-fill text-danger"></i> Emergency &amp; STEMI Triage
+                </a>
+            @endcan
+
+            @can('viewAny', \App\Modules\Ipd\Models\IpdAdmission::class)
+                <a href="{{ route('ipd.index') }}" class="nav-link {{ request()->routeIs('ipd.*') ? 'active' : '' }}">
+                    <i class="bi bi-hospital-fill"></i> Wards, Beds &amp; IPD
+                </a>
+            @endcan
+
             <hr class="border-light border-opacity-25 my-2">
             <div class="px-2 small text-uppercase text-white-50 fw-semibold">Upcoming Modules</div>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-hospital"></i> Wards &amp; IPD (Phase 2)</span>
             <span class="nav-link disabled opacity-50"><i class="bi bi-eyedropper"></i> Laboratory / LIS (Phase 3)</span>
             <span class="nav-link disabled opacity-50"><i class="bi bi-image"></i> Radiology / PACS (Phase 3/6)</span>
         </nav>
@@ -154,6 +165,12 @@
             @endcan
             @can('viewAny', \App\Modules\Appointments\Models\Appointment::class)
                 <a href="{{ route('opd.index') }}" class="nav-link"><i class="bi bi-calendar2-check-fill"></i> OPD &amp; Appointments</a>
+            @endcan
+            @can('viewAny', \App\Modules\Emergency\Models\EmergencyTriage::class)
+                <a href="{{ route('emergency.index') }}" class="nav-link"><i class="bi bi-heart-pulse-fill text-danger"></i> Emergency Triage</a>
+            @endcan
+            @can('viewAny', \App\Modules\Ipd\Models\IpdAdmission::class)
+                <a href="{{ route('ipd.index') }}" class="nav-link"><i class="bi bi-hospital-fill"></i> Wards, Beds &amp; IPD</a>
             @endcan
         </nav>
     </div>

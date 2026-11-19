@@ -50,6 +50,12 @@ class OfflineAndSeederTest extends TestCase
         $encounter = $patient->encounters()->firstOrFail();
         $encounterHtml = $this->actingAs($consultant)->get(route('encounters.show', $encounter))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $encounterHtml);
+
+        $erHtml = $this->actingAs($consultant)->get(route('emergency.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $erHtml);
+
+        $ipdHtml = $this->actingAs($consultant)->get(route('ipd.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $ipdHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

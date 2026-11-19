@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Emr\Models;
 
 use App\Modules\Appointments\Models\Appointment;
+use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Iam\Models\StaffProfile;
+use App\Modules\Ipd\Models\IpdAdmission;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Patient\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
@@ -76,5 +78,20 @@ class Encounter extends Model
     public function clinicalNotes(): HasMany
     {
         return $this->hasMany(ClinicalNote::class)->orderByDesc('created_at');
+    }
+
+    public function diagnoses(): HasMany
+    {
+        return $this->hasMany(EncounterDiagnosis::class)->orderBy('diagnosis_rank')->orderByDesc('recorded_at');
+    }
+
+    public function emergencyTriage(): HasOne
+    {
+        return $this->hasOne(EmergencyTriage::class);
+    }
+
+    public function ipdAdmission(): HasOne
+    {
+        return $this->hasOne(IpdAdmission::class);
     }
 }

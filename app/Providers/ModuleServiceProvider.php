@@ -8,8 +8,12 @@ use App\Modules\AiAssistant\Contracts\AiGatewayInterface;
 use App\Modules\AiAssistant\Services\DisabledAiGateway;
 use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Appointments\Policies\AppointmentPolicy;
+use App\Modules\Emergency\Models\EmergencyTriage;
+use App\Modules\Emergency\Policies\EmergencyTriagePolicy;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Policies\EncounterPolicy;
+use App\Modules\Ipd\Models\IpdAdmission;
+use App\Modules\Ipd\Policies\IpdAdmissionPolicy;
 use App\Modules\Pacs\Contracts\PacsGatewayInterface;
 use App\Modules\Pacs\Services\NullPacsGateway;
 use App\Modules\Patient\Models\Patient;
@@ -31,5 +35,7 @@ class ModuleServiceProvider extends ServiceProvider
         Gate::policy(Patient::class, PatientPolicy::class);
         Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(Encounter::class, EncounterPolicy::class);
+        Gate::policy(EmergencyTriage::class, EmergencyTriagePolicy::class);
+        Gate::policy(IpdAdmission::class, IpdAdmissionPolicy::class);
     }
 }
