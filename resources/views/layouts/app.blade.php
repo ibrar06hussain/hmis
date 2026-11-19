@@ -68,6 +68,12 @@
                 </a>
             @endcan
 
+            @can('viewWorkbench', \App\Modules\Nursing\Models\NursingMarRecord::class)
+                <a href="{{ route('nursing.index') }}" class="nav-link {{ request()->routeIs('nursing.*') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard2-heart-fill"></i> Nursing &amp; MAR
+                </a>
+            @endcan
+
             @can('viewWorkbench', \App\Modules\Lis\Models\LabOrder::class)
                 <a href="{{ route('lis.index') }}" class="nav-link {{ request()->routeIs('lis.*') ? 'active' : '' }}">
                     <i class="bi bi-eyedropper"></i> Laboratory (LIS)
@@ -92,10 +98,21 @@
                 </a>
             @endcan
 
+            @can('viewAny', \App\Modules\Hr\Models\DutyRoster::class)
+                <a href="{{ route('rosters.index') }}" class="nav-link {{ request()->routeIs('rosters.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-week-fill"></i> Duty Rosters
+                </a>
+            @endcan
+
+            @can('viewExecutive', \App\Modules\Reporting\Services\HospitalReportingService::class)
+                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line-fill"></i> Executive Reports
+                </a>
+            @endcan
+
             <hr class="border-light border-opacity-25 my-2">
-            <div class="px-2 small text-uppercase text-white-50 fw-semibold">Future Integration Phases</div>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-cpu"></i> PACS / OHIF &amp; ICU (Phase 6)</span>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-stars"></i> AI Draft Assist (Disabled)</span>
+            <div class="px-2 small text-uppercase text-white-50 fw-semibold">Governance Controls</div>
+            <span class="nav-link disabled opacity-50"><i class="bi bi-stars"></i> AI Assist (Disabled)</span>
         </nav>
 
         <div class="pt-3 border-top border-light border-opacity-25 small text-white-50">

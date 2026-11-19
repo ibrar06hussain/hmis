@@ -104,4 +104,21 @@ class RisWorkbenchController extends Controller
 
         return back()->with('status', "Radiology report for {$updated->accession_number} saved ({$updated->status}).");
     }
+
+    public function syncPacs(ImagingStudy $study): RedirectResponse
+    {
+        Gate::authorize('report', ImagingStudy::class);
+
+        if (! $this->pacsGateway->isEnabled()) {
+            return back()->with('warning', 'Orthanc PACS gateway is currently disabled (HMIS_PACS_ENABLED=false).');
+        }
+
+        $uid = $this->pacsGateway->syncStudyByAccession($study);
+
+        if ($uid === null) {
+            return back()->with('warning', "No DICOM study found in Orthanc PACS yet for Accession {$study->accession_number}.");
+        }
+
+        return back()->with('status', "Synced DICOM StudyInstanceUID ({$uid}) from Orthanc PACS for {$study->accession_number}.");
+    }
 }

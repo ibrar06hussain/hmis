@@ -5,13 +5,16 @@ declare(strict_types=1);
 use App\Modules\Billing\Http\Controllers\BillingDeskController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
+use App\Modules\Hr\Http\Controllers\DutyRosterController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
 use App\Modules\Ipd\Http\Controllers\IpdController;
 use App\Modules\Lis\Http\Controllers\LisWorkbenchController;
+use App\Modules\Nursing\Http\Controllers\NursingStationController;
 use App\Modules\Opd\Http\Controllers\OpdQueueController;
 use App\Modules\Patient\Http\Controllers\PatientController;
 use App\Modules\Pharmacy\Http\Controllers\PharmacyWorkbenchController;
+use App\Modules\Reporting\Http\Controllers\ExecutiveReportController;
 use App\Modules\Ris\Http\Controllers\RisWorkbenchController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +71,12 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/beds/{bed}/mark-available', [IpdController::class, 'markBedAvailable'])->name('beds.mark-available');
     });
 
+    Route::prefix('nursing')->name('nursing.')->group(function (): void {
+        Route::get('/', [NursingStationController::class, 'index'])->name('index');
+        Route::post('/mar', [NursingStationController::class, 'storeMar'])->name('mar.store');
+        Route::post('/notes', [NursingStationController::class, 'storeNote'])->name('notes.store');
+    });
+
     Route::prefix('lis')->name('lis.')->group(function (): void {
         Route::get('/', [LisWorkbenchController::class, 'index'])->name('index');
         Route::post('/specimens/{specimen}/collect', [LisWorkbenchController::class, 'collectSpecimen'])->name('specimens.collect');
@@ -82,6 +91,7 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('ris')->name('ris.')->group(function (): void {
         Route::get('/', [RisWorkbenchController::class, 'index'])->name('index');
         Route::post('/studies/{study}/report', [RisWorkbenchController::class, 'saveReport'])->name('studies.report');
+        Route::post('/studies/{study}/sync-pacs', [RisWorkbenchController::class, 'syncPacs'])->name('studies.sync-pacs');
     });
 
     Route::prefix('pharmacy')->name('pharmacy.')->group(function (): void {
@@ -95,6 +105,13 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/invoices/{invoice}/pay', [BillingDeskController::class, 'recordPayment'])->name('invoices.pay');
         Route::post('/invoices/{invoice}/void', [BillingDeskController::class, 'voidInvoice'])->name('invoices.void');
     });
+
+    Route::prefix('rosters')->name('rosters.')->group(function (): void {
+        Route::get('/', [DutyRosterController::class, 'index'])->name('index');
+        Route::post('/', [DutyRosterController::class, 'store'])->name('store');
+    });
+
+    Route::get('/reports', [ExecutiveReportController::class, 'index'])->name('reports.index');
 
     Route::prefix('encounters')->name('encounters.')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');

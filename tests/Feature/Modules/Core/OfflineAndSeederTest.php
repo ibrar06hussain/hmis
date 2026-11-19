@@ -69,6 +69,17 @@ class OfflineAndSeederTest extends TestCase
         $billingOfficer = User::query()->where('username', 'billing')->firstOrFail();
         $billingHtml = $this->actingAs($billingOfficer)->get(route('billing.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $billingHtml);
+
+        $nurse = User::query()->where('username', 'nurse_ccu')->firstOrFail();
+        $nursingHtml = $this->actingAs($nurse)->get(route('nursing.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $nursingHtml);
+
+        $rosterHtml = $this->actingAs($consultant)->get(route('rosters.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $rosterHtml);
+
+        $ms = User::query()->where('username', 'ms')->firstOrFail();
+        $reportHtml = $this->actingAs($ms)->get(route('reports.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $reportHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

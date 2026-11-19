@@ -3,6 +3,12 @@
 
 All notable milestones are documented chronologically.
 
+### [0.5.0] — 2026-11-20 (Nursing MAR, HR Duty Rosters, Executive Reporting & Phase 6 Orthanc/OHIF PACS)
+- Added Nursing Station & Bedside MAR (`/nursing`): Five-Rights medication administration records (mandatory clinical reason for `held`/`refused`), shift handover notes, and cardiac fluid balance (Intake/Output mL + net calculation).
+- Added HR Staff Duty Rosters (`/rosters`) with conflict protection preventing double-scheduling a clinician/nurse onto the same date & shift.
+- Added Executive Operational & Clinical Governance Reporting Dashboard (`/reports`) aggregating ward-by-ward bed occupancy, OPD/IPD/Code STEMI volume, LIS average turnaround time & unacknowledged critical values, billing & government/Sehat Card waivers, and active break-glass overrides.
+- Added Phase 6 `OrthancPacsGateway` implementing `PacsGatewayInterface`: dynamic config binding (`HMIS_PACS_ENABLED=true`), DICOMweb QIDO-RS study lookup by Accession Number (`POST /ris/studies/{study}/sync-pacs`), and audited ephemeral OHIF Viewer sessions (`pacs_viewer_sessions`) with zero pixel data in the HMIS database.
+
 ### [0.4.0] — 2026-11-20 (Phase 4: Pharmacy, Billing & CI/DR)
 - Added Hospital Pharmacy module: cardiac formulary (`medications`), prescriptions (`RX-YYYY-NNNNNN`), active medication allergy conflict blocking with audited override, atomic stock deduction (`lockForUpdate()`), and immutable `stock_movements`.
 - Added Billing & Accounts module: service tariffs, invoices (`INV-YYYY-NNNNNN`), Government/Sehat Card/Zakat/Indigent exemptions, overpayment protection, void reversals, and strictly immutable `financial_ledger_entries`.

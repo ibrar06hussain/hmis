@@ -42,6 +42,8 @@ class RoleAndPermissionSeeder extends Seeder
         'pharmacy.prescribe',
         'pharmacy.dispense',
         'billing.manage',
+        'hr.roster.manage',
+        'reporting.view_executive',
         'audit.view_logs',
         'iam.manage_users',
         'iam.break_glass',
@@ -58,6 +60,8 @@ class RoleAndPermissionSeeder extends Seeder
         $roles = [
             'hospital_director' => [
                 'patient.view_demographics',
+                'hr.roster.manage',
+                'reporting.view_executive',
                 'audit.view_logs',
             ],
             'medical_superintendent' => [
@@ -65,6 +69,8 @@ class RoleAndPermissionSeeder extends Seeder
                 'patient.view_clinical_profile',
                 'patient.view_all_clinical_governance',
                 'patient.merge',
+                'hr.roster.manage',
+                'reporting.view_executive',
                 'audit.view_logs',
             ],
             'administrator' => [
@@ -75,6 +81,8 @@ class RoleAndPermissionSeeder extends Seeder
                 'patient.update_demographics',
                 'patient.merge',
                 'billing.manage',
+                'hr.roster.manage',
+                'reporting.view_executive',
                 'iam.manage_users',
                 'audit.view_logs',
             ],

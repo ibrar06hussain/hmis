@@ -18,4 +18,9 @@ final class NullPacsGateway implements PacsGatewayInterface
     {
         return null;
     }
+
+    public function syncStudyByAccession(ImagingStudy $study): ?string
+    {
+        return null;
+    }
 }

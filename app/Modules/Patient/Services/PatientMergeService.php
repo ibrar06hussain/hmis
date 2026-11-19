@@ -19,6 +19,8 @@ use App\Modules\Ipd\Models\BedAllocation;
 use App\Modules\Ipd\Models\IpdAdmission;
 use App\Modules\Lis\Models\LabOrder;
 use App\Modules\Lis\Models\Specimen;
+use App\Modules\Nursing\Models\NursingMarRecord;
+use App\Modules\Nursing\Models\NursingNote;
 use App\Modules\Pacs\Models\ImagingStudy;
 use App\Modules\Patient\Models\Patient;
 use App\Modules\Patient\Models\PatientContact;
@@ -77,6 +79,8 @@ final class PatientMergeService
                 'specimens' => Specimen::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'imaging_studies' => ImagingStudy::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'prescriptions' => Prescription::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'nursing_mar_records' => NursingMarRecord::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'nursing_notes' => NursingNote::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'invoices' => Invoice::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'financial_ledger_entries' => FinancialLedgerEntry::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'contacts' => PatientContact::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id, 'is_primary' => false]),

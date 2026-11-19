@@ -69,6 +69,13 @@
                         <td class="text-end text-nowrap">
                             @if($viewerUrl)
                                 <a href="{{ $viewerUrl }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">OHIF</a>
+                            @elseif($pacsGateway->isEnabled() && empty($study->study_instance_uid))
+                                @can('report', \App\Modules\Pacs\Models\ImagingStudy::class)
+                                    <form method="POST" action="{{ route('ris.studies.sync-pacs', $study) }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Sync PACS</button>
+                                    </form>
+                                @endcan
                             @endif
                             @if($study->status !== 'verified')
                                 @can('report', \App\Modules\Pacs\Models\ImagingStudy::class)

@@ -7,13 +7,18 @@ namespace App\Modules\Pacs\Contracts;
 use App\Modules\Pacs\Models\ImagingStudy;
 
 /**
- * Future PACS Integration Contract (Phase 6: Orthanc + OHIF + DICOMweb).
+ * PACS Integration Contract (Phase 6: Orthanc DICOM Server + OHIF Viewer + DICOMweb).
  *
- * Keeps Unified Patient Profile completely decoupled from PACS vendor specifics.
+ * Keeps Unified Patient Profile & RIS completely decoupled from PACS vendor specifics.
  */
 interface PacsGatewayInterface
 {
     public function isEnabled(): bool;
 
     public function buildViewerUrl(ImagingStudy $study, int $userId): ?string;
+
+    /**
+     * Query PACS (DICOMweb QIDO-RS) by Accession Number and attach StudyInstanceUID if found.
+     */
+    public function syncStudyByAccession(ImagingStudy $study): ?string;
 }
