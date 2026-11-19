@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Modules\AiAssistant\Http\Controllers\AiGovernanceController;
 use App\Modules\Billing\Http\Controllers\BillingDeskController;
+use App\Modules\Cardiology\Http\Controllers\CardiacProcedureController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Hr\Http\Controllers\DutyRosterController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
+use App\Modules\Icu\Http\Controllers\IcuTelemetryController;
 use App\Modules\Ipd\Http\Controllers\IpdController;
 use App\Modules\Lis\Http\Controllers\LisWorkbenchController;
 use App\Modules\Nursing\Http\Controllers\NursingStationController;
@@ -77,6 +80,18 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/notes', [NursingStationController::class, 'storeNote'])->name('notes.store');
     });
 
+    Route::prefix('cardiology/procedures')->name('cardiology.procedures.')->group(function (): void {
+        Route::get('/', [CardiacProcedureController::class, 'index'])->name('index');
+        Route::post('/', [CardiacProcedureController::class, 'store'])->name('store');
+        Route::post('/{procedure}/complete', [CardiacProcedureController::class, 'complete'])->name('complete');
+    });
+
+    Route::prefix('icu')->name('icu.')->group(function (): void {
+        Route::get('/', [IcuTelemetryController::class, 'index'])->name('index');
+        Route::post('/observations/{observation}/verify', [IcuTelemetryController::class, 'verify'])->name('observations.verify');
+        Route::post('/observations/{observation}/reject', [IcuTelemetryController::class, 'rejectArtifact'])->name('observations.reject');
+    });
+
     Route::prefix('lis')->name('lis.')->group(function (): void {
         Route::get('/', [LisWorkbenchController::class, 'index'])->name('index');
         Route::post('/specimens/{specimen}/collect', [LisWorkbenchController::class, 'collectSpecimen'])->name('specimens.collect');
@@ -112,6 +127,11 @@ Route::middleware('auth')->group(function (): void {
     });
 
     Route::get('/reports', [ExecutiveReportController::class, 'index'])->name('reports.index');
+
+    Route::prefix('ai-governance')->name('ai.')->group(function (): void {
+        Route::get('/', [AiGovernanceController::class, 'index'])->name('index');
+        Route::post('/draft', [AiGovernanceController::class, 'invokeDraft'])->name('draft');
+    });
 
     Route::prefix('encounters')->name('encounters.')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');

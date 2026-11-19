@@ -6,11 +6,14 @@ namespace App\Providers;
 
 use App\Modules\AiAssistant\Contracts\AiGatewayInterface;
 use App\Modules\AiAssistant\Services\DisabledAiGateway;
+use App\Modules\AiAssistant\Services\LocalDraftAiGateway;
 use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Appointments\Policies\AppointmentPolicy;
 use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Billing\Models\Invoice;
 use App\Modules\Billing\Policies\InvoicePolicy;
+use App\Modules\Cardiology\Models\CardiacProcedure;
+use App\Modules\Cardiology\Policies\CardiacProcedurePolicy;
 use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Emergency\Policies\EmergencyTriagePolicy;
 use App\Modules\Emr\Models\Encounter;
@@ -50,8 +53,14 @@ class ModuleServiceProvider extends ServiceProvider
             return new NullPacsGateway;
         });
 
-        // AI remains strictly disabled by default
-        $this->app->singleton(AiGatewayInterface::class, DisabledAiGateway::class);
+        // Dynamic AI gateway binding: strictly DisabledAiGateway by default (HMIS_AI_ENABLED=false)
+        $this->app->bind(AiGatewayInterface::class, function (): AiGatewayInterface {
+            if ((bool) config('hmis.ai.enabled', false)) {
+                return new LocalDraftAiGateway;
+            }
+
+            return new DisabledAiGateway;
+        });
     }
 
     public function boot(): void
@@ -68,5 +77,6 @@ class ModuleServiceProvider extends ServiceProvider
         Gate::policy(NursingMarRecord::class, NursingPolicy::class);
         Gate::policy(DutyRoster::class, DutyRosterPolicy::class);
         Gate::policy(HospitalReportingService::class, ReportingPolicy::class);
+        Gate::policy(CardiacProcedure::class, CardiacProcedurePolicy::class);
     }
 }

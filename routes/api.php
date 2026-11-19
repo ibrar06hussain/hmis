@@ -9,6 +9,8 @@ use App\Modules\Fhir\Http\Controllers\FhirDiagnosticReportController;
 use App\Modules\Fhir\Http\Controllers\FhirEncounterController;
 use App\Modules\Fhir\Http\Controllers\FhirMedicationRequestController;
 use App\Modules\Fhir\Http\Controllers\FhirPatientController;
+use App\Modules\Fhir\Http\Controllers\FhirProcedureController;
+use App\Modules\Icu\Http\Controllers\Api\IcuTelemetryApiController;
 use App\Modules\Patient\Http\Controllers\Api\PatientApiController;
 use App\Modules\Terminology\Http\Controllers\Api\TerminologyApiController;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +28,9 @@ Route::prefix('v1')->middleware('auth:sanctum')->name('api.v1.')->group(function
 
     Route::get('/terminology/search', [TerminologyApiController::class, 'search'])->name('terminology.search');
 
-    // LAN Analyzer Gateway Staging Endpoint (never auto-publishes)
+    // LAN Equipment Gateways (always staged as unverified until human review)
     Route::post('/lis/analyzer/ingest', [AnalyzerIngestApiController::class, 'ingest'])->name('lis.analyzer.ingest');
+    Route::post('/icu/telemetry/ingest', [IcuTelemetryApiController::class, 'ingest'])->name('icu.telemetry.ingest');
 });
 
 // Dedicated HL7 FHIR R4 interoperability surface
@@ -37,4 +40,5 @@ Route::prefix('fhir/r4')->middleware('auth:sanctum')->name('api.fhir.r4.')->grou
     Route::get('/Condition/{uuid}', [FhirConditionController::class, 'show'])->name('condition.show');
     Route::get('/DiagnosticReport/{uuid}', [FhirDiagnosticReportController::class, 'show'])->name('diagnostic-report.show');
     Route::get('/MedicationRequest/{uuid}', [FhirMedicationRequestController::class, 'show'])->name('medication-request.show');
+    Route::get('/Procedure/{uuid}', [FhirProcedureController::class, 'show'])->name('procedure.show');
 });

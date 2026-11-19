@@ -72,6 +72,15 @@
                 <a href="{{ route('nursing.index') }}" class="nav-link {{ request()->routeIs('nursing.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-heart-fill"></i> Nursing &amp; MAR
                 </a>
+                <a href="{{ route('icu.index') }}" class="nav-link {{ request()->routeIs('icu.*') ? 'active' : '' }}">
+                    <i class="bi bi-activity text-info"></i> ICU Bedside Telemetry
+                </a>
+            @endcan
+
+            @can('viewWorkbench', \App\Modules\Cardiology\Models\CardiacProcedure::class)
+                <a href="{{ route('cardiology.procedures.index') }}" class="nav-link {{ request()->routeIs('cardiology.procedures.*') ? 'active' : '' }}">
+                    <i class="bi bi-heart-fill text-danger"></i> Cath Lab &amp; Cardiac OT
+                </a>
             @endcan
 
             @can('viewWorkbench', \App\Modules\Lis\Models\LabOrder::class)
@@ -112,7 +121,11 @@
 
             <hr class="border-light border-opacity-25 my-2">
             <div class="px-2 small text-uppercase text-white-50 fw-semibold">Governance Controls</div>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-stars"></i> AI Assist (Disabled)</span>
+            @if(auth()->user()?->can('audit.view_logs') || auth()->user()?->can('emr.note.sign'))
+                <a href="{{ route('ai.index') }}" class="nav-link {{ request()->routeIs('ai.*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-lock-fill text-warning"></i> AI Governance ({{ config('hmis.ai.enabled') ? 'Draft' : 'Off' }})
+                </a>
+            @endif
         </nav>
 
         <div class="pt-3 border-top border-light border-opacity-25 small text-white-50">

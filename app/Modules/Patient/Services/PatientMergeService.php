@@ -9,12 +9,14 @@ use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Billing\Models\FinancialLedgerEntry;
 use App\Modules\Billing\Models\Invoice;
+use App\Modules\Cardiology\Models\CardiacProcedure;
 use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Models\EncounterDiagnosis;
 use App\Modules\Emr\Models\PatientAllergy;
 use App\Modules\Emr\Models\VitalSign;
+use App\Modules\Icu\Models\IcuDeviceObservation;
 use App\Modules\Ipd\Models\BedAllocation;
 use App\Modules\Ipd\Models\IpdAdmission;
 use App\Modules\Lis\Models\LabOrder;
@@ -81,6 +83,8 @@ final class PatientMergeService
                 'prescriptions' => Prescription::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'nursing_mar_records' => NursingMarRecord::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'nursing_notes' => NursingNote::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'cardiac_procedures' => CardiacProcedure::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'icu_device_observations' => IcuDeviceObservation::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'invoices' => Invoice::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'financial_ledger_entries' => FinancialLedgerEntry::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'contacts' => PatientContact::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id, 'is_primary' => false]),
