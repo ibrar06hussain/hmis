@@ -208,6 +208,75 @@
                 <div class="text-muted small py-1">No coded diagnoses recorded yet.</div>
             @endforelse
         </div>
+
+        {{-- Order Laboratory & Diagnostic Imaging Directly from Clinical Encounter --}}
+        @can('create', \App\Modules\Lis\Models\LabOrder::class)
+            <div class="hmis-card p-3 mt-3">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-2"><i class="bi bi-eyedropper me-2 text-primary"></i>Order Laboratory Investigations</h2>
+                <form method="POST" action="{{ route('encounters.lab-orders.store', $encounter) }}">
+                    @csrf
+                    <div class="mb-2" style="max-height: 150px; overflow-y: auto;">
+                        @foreach($labTests as $test)
+                            <div class="form-check small">
+                                <input class="form-check-input" type="checkbox" name="test_ids[]" value="{{ $test->id }}" id="labTest-{{ $test->id }}">
+                                <label class="form-check-label" for="labTest-{{ $test->id }}">
+                                    <strong>{{ $test->code }}</strong> — {{ $test->name }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-5">
+                            <select name="priority" class="form-select form-select-sm">
+                                <option value="routine">Routine</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="stat">STAT (Immediate)</option>
+                            </select>
+                        </div>
+                        <div class="col-7">
+                            <input type="text" name="clinical_notes" class="form-control form-control-sm" placeholder="Clinical notes (optional)">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sm btn-outline-primary fw-semibold">Place Lab Order</button>
+                    </div>
+                </form>
+            </div>
+        @endcan
+
+        @can('create', \App\Modules\Pacs\Models\ImagingStudy::class)
+            <div class="hmis-card p-3 mt-3">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-2"><i class="bi bi-image me-2 text-primary"></i>Order Diagnostic Imaging / Echo / ECG</h2>
+                <form method="POST" action="{{ route('encounters.imaging-orders.store', $encounter) }}">
+                    @csrf
+                    <div class="mb-2">
+                        <select name="imaging_catalog_id" class="form-select form-select-sm" required>
+                            <option value="">Select imaging procedure...</option>
+                            @foreach($imagingCatalog as $img)
+                                <option value="{{ $img->id }}">
+                                    [{{ $img->modality }}] {{ $img->name }} @if($img->requires_contrast)(Contrast)@endif
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-5">
+                            <select name="priority" class="form-select form-select-sm">
+                                <option value="routine">Routine</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="stat">STAT</option>
+                            </select>
+                        </div>
+                        <div class="col-7">
+                            <input type="text" name="clinical_indication" class="form-control form-control-sm" placeholder="Clinical indication">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sm btn-outline-dark fw-semibold">Place Imaging Order</button>
+                    </div>
+                </form>
+            </div>
+        @endcan
     </div>
 
     {{-- Right Column: Structured Cardiology Clinical Note & Immutable Revision History --}}

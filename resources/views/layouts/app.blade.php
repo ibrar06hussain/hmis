@@ -68,10 +68,21 @@
                 </a>
             @endcan
 
+            @can('viewWorkbench', \App\Modules\Lis\Models\LabOrder::class)
+                <a href="{{ route('lis.index') }}" class="nav-link {{ request()->routeIs('lis.*') ? 'active' : '' }}">
+                    <i class="bi bi-eyedropper"></i> Laboratory (LIS)
+                </a>
+            @endcan
+
+            @can('viewWorkbench', \App\Modules\Pacs\Models\ImagingStudy::class)
+                <a href="{{ route('ris.index') }}" class="nav-link {{ request()->routeIs('ris.*') ? 'active' : '' }}">
+                    <i class="bi bi-image-fill"></i> Radiology &amp; PACS (RIS)
+                </a>
+            @endcan
+
             <hr class="border-light border-opacity-25 my-2">
             <div class="px-2 small text-uppercase text-white-50 fw-semibold">Upcoming Modules</div>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-eyedropper"></i> Laboratory / LIS (Phase 3)</span>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-image"></i> Radiology / PACS (Phase 3/6)</span>
+            <span class="nav-link disabled opacity-50"><i class="bi bi-capsule"></i> Pharmacy &amp; Billing (Phase 4)</span>
         </nav>
 
         <div class="pt-3 border-top border-light border-opacity-25 small text-white-50">

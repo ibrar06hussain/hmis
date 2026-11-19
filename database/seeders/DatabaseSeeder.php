@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             HospitalOrganizationSeeder::class,
             TerminologySeeder::class,
+            LabAndImagingCatalogSeeder::class,
         ]);
 
         if (config('hmis.demo_mode') || app()->environment('local')) {

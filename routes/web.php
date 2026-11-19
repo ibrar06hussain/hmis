@@ -7,8 +7,10 @@ use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
 use App\Modules\Ipd\Http\Controllers\IpdController;
+use App\Modules\Lis\Http\Controllers\LisWorkbenchController;
 use App\Modules\Opd\Http\Controllers\OpdQueueController;
 use App\Modules\Patient\Http\Controllers\PatientController;
+use App\Modules\Ris\Http\Controllers\RisWorkbenchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -64,6 +66,22 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/beds/{bed}/mark-available', [IpdController::class, 'markBedAvailable'])->name('beds.mark-available');
     });
 
+    Route::prefix('lis')->name('lis.')->group(function (): void {
+        Route::get('/', [LisWorkbenchController::class, 'index'])->name('index');
+        Route::post('/specimens/{specimen}/collect', [LisWorkbenchController::class, 'collectSpecimen'])->name('specimens.collect');
+        Route::post('/specimens/{specimen}/receive', [LisWorkbenchController::class, 'receiveSpecimen'])->name('specimens.receive');
+        Route::post('/specimens/{specimen}/reject', [LisWorkbenchController::class, 'rejectSpecimen'])->name('specimens.reject');
+        Route::post('/items/{item}/result', [LisWorkbenchController::class, 'enterResult'])->name('items.result');
+        Route::post('/items/{item}/tech-validate', [LisWorkbenchController::class, 'techValidate'])->name('items.tech-validate');
+        Route::post('/items/{item}/verify', [LisWorkbenchController::class, 'verify'])->name('items.verify');
+        Route::post('/items/{item}/acknowledge-critical', [LisWorkbenchController::class, 'acknowledgeCritical'])->name('items.acknowledge-critical');
+    });
+
+    Route::prefix('ris')->name('ris.')->group(function (): void {
+        Route::get('/', [RisWorkbenchController::class, 'index'])->name('index');
+        Route::post('/studies/{study}/report', [RisWorkbenchController::class, 'saveReport'])->name('studies.report');
+    });
+
     Route::prefix('encounters')->name('encounters.')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');
         Route::post('/{encounter}/vitals', [EncounterWorkspaceController::class, 'storeVitals'])->name('vitals.store');
@@ -72,6 +90,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/{encounter}/notes/{note}/sign', [EncounterWorkspaceController::class, 'signNote'])->name('notes.sign');
         Route::post('/{encounter}/notes/{note}/amend', [EncounterWorkspaceController::class, 'amendNote'])->name('notes.amend');
         Route::post('/{encounter}/diagnoses', [EncounterWorkspaceController::class, 'storeDiagnosis'])->name('diagnoses.store');
+        Route::post('/{encounter}/lab-orders', [LisWorkbenchController::class, 'storeOrder'])->name('lab-orders.store');
+        Route::post('/{encounter}/imaging-orders', [RisWorkbenchController::class, 'storeOrder'])->name('imaging-orders.store');
         Route::post('/{encounter}/complete', [EncounterWorkspaceController::class, 'complete'])->name('complete');
     });
 });

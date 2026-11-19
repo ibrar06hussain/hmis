@@ -14,10 +14,14 @@ use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Policies\EncounterPolicy;
 use App\Modules\Ipd\Models\IpdAdmission;
 use App\Modules\Ipd\Policies\IpdAdmissionPolicy;
+use App\Modules\Lis\Models\LabOrder;
+use App\Modules\Lis\Policies\LabOrderPolicy;
 use App\Modules\Pacs\Contracts\PacsGatewayInterface;
+use App\Modules\Pacs\Models\ImagingStudy;
 use App\Modules\Pacs\Services\NullPacsGateway;
 use App\Modules\Patient\Models\Patient;
 use App\Modules\Patient\Policies\PatientPolicy;
+use App\Modules\Ris\Policies\ImagingStudyPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,5 +41,7 @@ class ModuleServiceProvider extends ServiceProvider
         Gate::policy(Encounter::class, EncounterPolicy::class);
         Gate::policy(EmergencyTriage::class, EmergencyTriagePolicy::class);
         Gate::policy(IpdAdmission::class, IpdAdmissionPolicy::class);
+        Gate::policy(LabOrder::class, LabOrderPolicy::class);
+        Gate::policy(ImagingStudy::class, ImagingStudyPolicy::class);
     }
 }

@@ -130,6 +130,9 @@ class PatientController extends Controller
                 'ipdAdmissions.ward',
                 'ipdAdmissions.bed',
                 'appointments.department',
+                'labOrders.items.test',
+                'labOrders.items.verifiedBy',
+                'labOrders.items.criticalAcknowledgedBy',
                 'imagingStudies',
             ]);
         }

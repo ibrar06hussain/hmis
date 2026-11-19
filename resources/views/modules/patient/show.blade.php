@@ -301,6 +301,51 @@
     </div>
 @elseif($activeTab === 'diagnostics')
     <div class="row g-3">
+        {{-- Verified Laboratory Reports (Clinical Safety Gate: Unverified results NEVER published here) --}}
+        <div class="col-12">
+            <div class="hmis-card p-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="h6 fw-bold mb-0">Verified Laboratory Reports (LIS)</h2>
+                        <small class="text-muted">Only results verified by an authorized Pathologist/Verifier are published to the clinical record</small>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr><th>Order #</th><th>Test (LOINC)</th><th>Verified Result</th><th>Ref Range</th><th>Flag</th><th>Verified By / Time (PKT)</th></tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $verifiedItems = $patient->labOrders
+                                    ->flatMap(fn ($o) => $o->items->where('status', \App\Modules\Lis\Models\LabOrderItem::STATUS_VERIFIED)->map(fn ($i) => [$o, $i]));
+                            @endphp
+                            @forelse($verifiedItems as [$labOrder, $labItem])
+                                <tr class="{{ $labItem->is_critical ? 'table-danger' : '' }}">
+                                    <td class="font-monospace">{{ $labOrder->order_number }}</td>
+                                    <td><strong>{{ $labItem->test->name }}</strong> <span class="text-muted">({{ $labItem->test->code }})</span></td>
+                                    <td class="fw-bold">{{ $labItem->result_value_text }} {{ $labItem->unit }}</td>
+                                    <td class="font-monospace">{{ $labItem->ref_low ?? '—' }} – {{ $labItem->ref_high ?? '—' }}</td>
+                                    <td>
+                                        @if($labItem->is_critical)
+                                            <span class="badge bg-danger">CRITICAL</span>
+                                        @elseif($labItem->abnormal_flag && $labItem->abnormal_flag !== 'normal')
+                                            <span class="badge bg-warning text-dark">{{ strtoupper($labItem->abnormal_flag) }}</span>
+                                        @else
+                                            <span class="badge bg-success-subtle text-success">NORMAL</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $labItem->verifiedBy?->name }} &middot; {{ \App\Support\DateTimeHelper::formatDateTime($labItem->verified_at) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="text-center text-muted py-3">No verified laboratory reports available yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="col-12">
             <div class="hmis-card p-3">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">

@@ -56,6 +56,12 @@ class OfflineAndSeederTest extends TestCase
 
         $ipdHtml = $this->actingAs($consultant)->get(route('ipd.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $ipdHtml);
+
+        $lisHtml = $this->actingAs($consultant)->get(route('lis.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $lisHtml);
+
+        $risHtml = $this->actingAs($consultant)->get(route('ris.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $risHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

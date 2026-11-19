@@ -13,6 +13,7 @@ use App\Modules\Emr\Models\EncounterDiagnosis;
 use App\Modules\Emr\Models\PatientAllergy;
 use App\Modules\Emr\Models\VitalSign;
 use App\Modules\Ipd\Models\IpdAdmission;
+use App\Modules\Lis\Models\LabOrder;
 use App\Modules\Organization\Models\Facility;
 use App\Modules\Pacs\Models\ImagingStudy;
 use App\Support\CnicNormalizer;
@@ -186,6 +187,11 @@ class Patient extends Model
     public function ipdAdmissions(): HasMany
     {
         return $this->hasMany(IpdAdmission::class)->orderByDesc('admitted_at');
+    }
+
+    public function labOrders(): HasMany
+    {
+        return $this->hasMany(LabOrder::class)->orderByDesc('ordered_at');
     }
 
     public function allergies(): HasMany

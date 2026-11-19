@@ -8,7 +8,9 @@ use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Iam\Models\StaffProfile;
 use App\Modules\Ipd\Models\IpdAdmission;
+use App\Modules\Lis\Models\LabOrder;
 use App\Modules\Organization\Models\Department;
+use App\Modules\Pacs\Models\ImagingStudy;
 use App\Modules\Patient\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -93,5 +95,15 @@ class Encounter extends Model
     public function ipdAdmission(): HasOne
     {
         return $this->hasOne(IpdAdmission::class);
+    }
+
+    public function labOrders(): HasMany
+    {
+        return $this->hasMany(LabOrder::class)->orderByDesc('ordered_at');
+    }
+
+    public function imagingStudies(): HasMany
+    {
+        return $this->hasMany(ImagingStudy::class)->orderByDesc('created_at');
     }
 }

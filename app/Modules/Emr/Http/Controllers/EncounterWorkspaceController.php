@@ -17,7 +17,9 @@ use App\Modules\Emr\Services\AllergyService;
 use App\Modules\Emr\Services\ClinicalNoteService;
 use App\Modules\Emr\Services\EncounterDiagnosisService;
 use App\Modules\Emr\Services\VitalSignService;
+use App\Modules\Lis\Models\LabTestCatalog;
 use App\Modules\Patient\Models\Patient;
+use App\Modules\Ris\Models\ImagingCatalog;
 use App\Modules\Terminology\Services\TerminologySearchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,12 +52,16 @@ class EncounterWorkspaceController extends Controller
             'clinicalNotes.signedBy',
             'clinicalNotes.supersedesNote',
             'diagnoses.recordedBy',
+            'labOrders.items.test',
+            'imagingStudies',
         ]);
 
         return view('modules.emr.encounter', [
             'encounter' => $encounter,
             'patient' => $encounter->patient,
             'terminologyCodes' => $this->terminologySearch->search(null, null, 50),
+            'labTests' => LabTestCatalog::query()->where('is_active', true)->orderBy('section')->orderBy('name')->get(),
+            'imagingCatalog' => ImagingCatalog::query()->where('is_active', true)->orderBy('modality')->orderBy('name')->get(),
         ]);
     }
 
