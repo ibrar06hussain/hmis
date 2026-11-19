@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
+use App\Modules\Opd\Http\Controllers\OpdQueueController;
 use App\Modules\Patient\Http\Controllers\PatientController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,5 +37,24 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/{patient}', [PatientController::class, 'update'])->name('update');
         Route::get('/{patient}/card', [PatientController::class, 'card'])->name('card');
         Route::post('/{patient}/break-glass', [PatientController::class, 'breakGlass'])->name('break-glass');
+        Route::post('/{patient}/allergies', [EncounterWorkspaceController::class, 'storeAllergy'])->name('allergies.store');
+    });
+
+    Route::prefix('opd')->name('opd.')->group(function (): void {
+        Route::get('/', [OpdQueueController::class, 'index'])->name('index');
+        Route::post('/appointments', [OpdQueueController::class, 'store'])->name('appointments.store');
+        Route::post('/appointments/{appointment}/check-in', [OpdQueueController::class, 'checkIn'])->name('appointments.check-in');
+        Route::post('/appointments/{appointment}/start-consult', [OpdQueueController::class, 'startConsult'])->name('appointments.start-consult');
+        Route::post('/appointments/{appointment}/cancel', [OpdQueueController::class, 'cancel'])->name('appointments.cancel');
+    });
+
+    Route::prefix('encounters')->name('encounters.')->group(function (): void {
+        Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');
+        Route::post('/{encounter}/vitals', [EncounterWorkspaceController::class, 'storeVitals'])->name('vitals.store');
+        Route::post('/{encounter}/notes', [EncounterWorkspaceController::class, 'storeNote'])->name('notes.store');
+        Route::put('/{encounter}/notes/{note}', [EncounterWorkspaceController::class, 'updateNote'])->name('notes.update');
+        Route::post('/{encounter}/notes/{note}/sign', [EncounterWorkspaceController::class, 'signNote'])->name('notes.sign');
+        Route::post('/{encounter}/notes/{note}/amend', [EncounterWorkspaceController::class, 'amendNote'])->name('notes.amend');
+        Route::post('/{encounter}/complete', [EncounterWorkspaceController::class, 'complete'])->name('complete');
     });
 });

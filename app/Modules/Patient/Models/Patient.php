@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Patient\Models;
 
 use App\Models\User;
+use App\Modules\Appointments\Models\Appointment;
+use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Models\PatientAllergy;
+use App\Modules\Emr\Models\VitalSign;
 use App\Modules\Organization\Models\Facility;
 use App\Modules\Pacs\Models\ImagingStudy;
 use App\Support\CnicNormalizer;
@@ -150,6 +153,21 @@ class Patient extends Model
     public function encounters(): HasMany
     {
         return $this->hasMany(Encounter::class)->orderByDesc('started_at');
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class)->orderByDesc('appointment_date');
+    }
+
+    public function vitalSigns(): HasMany
+    {
+        return $this->hasMany(VitalSign::class)->orderByDesc('recorded_at');
+    }
+
+    public function clinicalNotes(): HasMany
+    {
+        return $this->hasMany(ClinicalNote::class)->orderByDesc('created_at');
     }
 
     public function allergies(): HasMany

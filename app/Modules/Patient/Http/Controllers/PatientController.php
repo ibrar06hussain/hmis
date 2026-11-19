@@ -123,6 +123,10 @@ class PatientController extends Controller
                 'allergies.recordedBy',
                 'encounters.department',
                 'encounters.attendingStaff.user',
+                'vitalSigns.recordedBy',
+                'clinicalNotes.authorUser',
+                'clinicalNotes.signedBy',
+                'appointments.department',
                 'imagingStudies',
             ]);
         }

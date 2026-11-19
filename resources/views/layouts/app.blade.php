@@ -50,9 +50,14 @@
                 </a>
             @endcan
 
+            @can('viewAny', \App\Modules\Appointments\Models\Appointment::class)
+                <a href="{{ route('opd.index') }}" class="nav-link {{ request()->routeIs('opd.*', 'encounters.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar2-check-fill"></i> OPD &amp; Appointments
+                </a>
+            @endcan
+
             <hr class="border-light border-opacity-25 my-2">
             <div class="px-2 small text-uppercase text-white-50 fw-semibold">Upcoming Modules</div>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-calendar2-check"></i> OPD &amp; Appointments (M1.4)</span>
             <span class="nav-link disabled opacity-50"><i class="bi bi-hospital"></i> Wards &amp; IPD (Phase 2)</span>
             <span class="nav-link disabled opacity-50"><i class="bi bi-eyedropper"></i> Laboratory / LIS (Phase 3)</span>
             <span class="nav-link disabled opacity-50"><i class="bi bi-image"></i> Radiology / PACS (Phase 3/6)</span>
@@ -146,6 +151,9 @@
             @endcan
             @can('patient.merge')
                 <a href="{{ route('patients.merge.form') }}" class="nav-link"><i class="bi bi-intersect"></i> Merge Patients</a>
+            @endcan
+            @can('viewAny', \App\Modules\Appointments\Models\Appointment::class)
+                <a href="{{ route('opd.index') }}" class="nav-link"><i class="bi bi-calendar2-check-fill"></i> OPD &amp; Appointments</a>
             @endcan
         </nav>
     </div>

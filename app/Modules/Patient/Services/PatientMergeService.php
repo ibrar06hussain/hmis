@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Patient\Services;
 
 use App\Models\User;
+use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Audit\Services\AuditLogger;
+use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Models\PatientAllergy;
+use App\Modules\Emr\Models\VitalSign;
 use App\Modules\Pacs\Models\ImagingStudy;
 use App\Modules\Patient\Models\Patient;
 use App\Modules\Patient\Models\PatientContact;
@@ -52,7 +55,10 @@ final class PatientMergeService
             }
 
             $movedCounts = [
+                'appointments' => Appointment::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'encounters' => Encounter::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'vital_signs' => VitalSign::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'clinical_notes' => ClinicalNote::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'allergies' => PatientAllergy::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'imaging_studies' => ImagingStudy::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'contacts' => PatientContact::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id, 'is_primary' => false]),

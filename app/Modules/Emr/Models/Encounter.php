@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Emr\Models;
 
+use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Iam\Models\StaffProfile;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Patient\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Encounter extends Model
@@ -58,5 +61,20 @@ class Encounter extends Model
     public function attendingStaff(): BelongsTo
     {
         return $this->belongsTo(StaffProfile::class, 'attending_staff_id');
+    }
+
+    public function appointment(): HasOne
+    {
+        return $this->hasOne(Appointment::class);
+    }
+
+    public function vitalSigns(): HasMany
+    {
+        return $this->hasMany(VitalSign::class)->orderByDesc('recorded_at');
+    }
+
+    public function clinicalNotes(): HasMany
+    {
+        return $this->hasMany(ClinicalNote::class)->orderByDesc('created_at');
     }
 }

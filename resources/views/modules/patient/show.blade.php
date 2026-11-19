@@ -34,6 +34,11 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2 no-print">
+            @can('create', \App\Modules\Appointments\Models\Appointment::class)
+                <a href="{{ route('opd.index', ['patient_id' => $patient->id]) }}" class="btn btn-sm btn-success fw-semibold">
+                    <i class="bi bi-calendar-plus me-1"></i>Book OPD Visit
+                </a>
+            @endcan
             <a href="{{ route('patients.card', $patient) }}" class="btn btn-sm btn-light">
                 <i class="bi bi-printer me-1"></i>MRN Card
             </a>
@@ -96,6 +101,12 @@
             <a class="nav-link {{ $activeTab === 'encounters' ? 'active fw-semibold' : '' }}" href="{{ route('patients.show', [$patient, 'tab' => 'encounters']) }}">
                 <i class="bi bi-clipboard2-pulse me-1"></i>Visits &amp; Admissions
                 <span class="badge bg-secondary ms-1">{{ $patient->encounters->count() }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $activeTab === 'vitals' ? 'active fw-semibold' : '' }}" href="{{ route('patients.show', [$patient, 'tab' => 'vitals']) }}">
+                <i class="bi bi-activity me-1"></i>Vitals &amp; Notes
+                <span class="badge bg-secondary ms-1">{{ $patient->vitalSigns->count() + $patient->clinicalNotes->count() }}</span>
             </a>
         </li>
         <li class="nav-item">
@@ -208,12 +219,14 @@
     <div class="hmis-card p-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="h6 fw-bold mb-0">OPD Consultations, Emergency Visits &amp; IPD Admissions</h2>
-            <span class="badge bg-light text-dark border">OPD Queue &amp; Clinical Notes: M1.4 / M1.5</span>
+            @can('create', \App\Modules\Appointments\Models\Appointment::class)
+                <a href="{{ route('opd.index', ['patient_id' => $patient->id]) }}" class="btn btn-sm btn-primary">Book OPD Visit</a>
+            @endcan
         </div>
         <div class="table-responsive">
             <table class="table table-sm table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr><th>Encounter #</th><th>Class</th><th>Department</th><th>Attending Clinician</th><th>Chief Complaint</th><th>Started (PKT)</th><th>Status</th></tr>
+                    <tr><th>Encounter #</th><th>Class</th><th>Department</th><th>Attending Clinician</th><th>Chief Complaint</th><th>Started (PKT)</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody>
                     @forelse($patient->encounters as $encounter)
@@ -225,12 +238,65 @@
                             <td>{{ $encounter->chief_complaint ?? '—' }}</td>
                             <td>{{ \App\Support\DateTimeHelper::formatDateTime($encounter->started_at) }}</td>
                             <td><span class="badge bg-info text-dark text-uppercase">{{ $encounter->status }}</span></td>
+                            <td class="text-end">
+                                @can('view', $encounter)
+                                    <a href="{{ route('encounters.show', $encounter) }}" class="btn btn-sm btn-outline-primary">Workspace</a>
+                                @endcan
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="text-center text-muted py-3">No encounters recorded for this patient yet.</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted py-3">No encounters recorded for this patient yet.</td></tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+@elseif($activeTab === 'vitals')
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="hmis-card p-3 h-100">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Vital Signs History ({{ $patient->vitalSigns->count() }})</h2>
+                @forelse($patient->vitalSigns as $v)
+                    <div class="p-2 mb-2 rounded border {{ $v->is_abnormal ? 'border-danger bg-danger-subtle' : 'bg-light' }} small">
+                        <div class="d-flex justify-content-between fw-semibold">
+                            <span>BP {{ $v->systolic_bp ?? '—' }}/{{ $v->diastolic_bp ?? '—' }} &middot; HR {{ $v->heart_rate ?? '—' }} &middot; SpO2 {{ $v->spo2_percent ?? '—' }}%</span>
+                            <span class="text-muted">{{ \App\Support\DateTimeHelper::formatDateTime($v->recorded_at, 'd M, H:i') }}</span>
+                        </div>
+                        @if($v->is_abnormal && !empty($v->abnormal_flags))
+                            <div class="mt-1">
+                                @foreach($v->abnormal_flags as $flag)
+                                    <span class="badge bg-danger">{{ str_replace('_', ' ', $flag) }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="text-muted small">No vital signs recorded yet.</div>
+                @endforelse
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="hmis-card p-3 h-100">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Clinical Notes &amp; Amendments ({{ $patient->clinicalNotes->count() }})</h2>
+                @forelse($patient->clinicalNotes as $note)
+                    <div class="border rounded p-2 mb-2 small {{ $note->status === 'amended' ? 'bg-light opacity-75' : '' }}">
+                        <div class="d-flex justify-content-between mb-1">
+                            <div>
+                                <span class="badge bg-dark text-uppercase">{{ str_replace('_', ' ', $note->note_type) }}</span>
+                                <span class="badge bg-secondary">Rev {{ $note->revision_number }}</span>
+                                <span class="badge {{ $note->status === 'signed' ? 'bg-success' : ($note->status === 'amended' ? 'bg-warning text-dark' : 'bg-info text-dark') }}">{{ strtoupper($note->status) }}</span>
+                            </div>
+                            <span class="text-muted">{{ \App\Support\DateTimeHelper::formatDateTime($note->created_at, 'd M Y, H:i') }}</span>
+                        </div>
+                        <div><strong>CC:</strong> {{ $note->chief_complaint }}</div>
+                        @if($note->assessment_and_diagnosis)
+                            <div><strong>Assessment:</strong> {{ $note->assessment_and_diagnosis }}</div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="text-muted small">No structured clinical notes documented yet.</div>
+                @endforelse
+            </div>
         </div>
     </div>
 @elseif($activeTab === 'diagnostics')
@@ -280,29 +346,75 @@
         </div>
     </div>
 @elseif($activeTab === 'allergies')
-    <div class="hmis-card p-3">
-        <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Recorded Allergies &amp; Adverse Reactions</h2>
-        <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
-                <thead class="table-light">
-                    <tr><th>Substance</th><th>Category</th><th>Severity</th><th>Reaction</th><th>Status</th><th>Recorded (PKT)</th></tr>
-                </thead>
-                <tbody>
-                    @forelse($patient->allergies as $allergy)
-                        <tr>
-                            <td class="fw-semibold">{{ $allergy->substance }}</td>
-                            <td>{{ ucfirst(str_replace('_', ' ', $allergy->category)) }}</td>
-                            <td><span class="badge {{ in_array($allergy->severity, ['severe', 'life_threatening'], true) ? 'bg-danger' : 'bg-warning text-dark' }}">{{ strtoupper($allergy->severity) }}</span></td>
-                            <td>{{ $allergy->reaction ?? '—' }}</td>
-                            <td>{{ ucfirst($allergy->clinical_status) }}</td>
-                            <td>{{ \App\Support\DateTimeHelper::formatDateTime($allergy->recorded_at) }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="6" class="text-center text-muted py-3">No allergies recorded.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="hmis-card p-3">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Recorded Allergies &amp; Adverse Reactions</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>Substance</th><th>Category</th><th>Severity</th><th>Reaction</th><th>Status</th><th>Recorded (PKT)</th></tr>
+                        </thead>
+                        <tbody>
+                            @forelse($patient->allergies as $allergy)
+                                <tr>
+                                    <td class="fw-semibold">{{ $allergy->substance }}</td>
+                                    <td>{{ ucfirst(str_replace('_', ' ', $allergy->category)) }}</td>
+                                    <td><span class="badge {{ in_array($allergy->severity, ['severe', 'life_threatening'], true) ? 'bg-danger' : 'bg-warning text-dark' }}">{{ strtoupper($allergy->severity) }}</span></td>
+                                    <td>{{ $allergy->reaction ?? '—' }}</td>
+                                    <td>{{ ucfirst($allergy->clinical_status) }}</td>
+                                    <td>{{ \App\Support\DateTimeHelper::formatDateTime($allergy->recorded_at) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="text-center text-muted py-3">No allergies recorded.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+        @if(auth()->user()->can('emr.note.create') || auth()->user()->can('emr.vitals.record'))
+            <div class="col-lg-4">
+                <div class="hmis-card p-3">
+                    <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Record New Allergy</h2>
+                    <form method="POST" action="{{ route('patients.allergies.store', $patient) }}">
+                        @csrf
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold" for="substance">Substance <span class="text-danger">*</span></label>
+                            <input type="text" id="substance" name="substance" class="form-control form-control-sm" required placeholder="e.g., Aspirin, IV Contrast, Penicillin">
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" for="category">Category</label>
+                                <select id="category" name="category" class="form-select form-select-sm">
+                                    <option value="medication">Medication</option>
+                                    <option value="contrast_dye">Contrast Dye</option>
+                                    <option value="food">Food</option>
+                                    <option value="latex">Latex</option>
+                                    <option value="environment">Environment</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" for="severity">Severity</label>
+                                <select id="severity" name="severity" class="form-select form-select-sm">
+                                    <option value="mild">Mild</option>
+                                    <option value="moderate" selected>Moderate</option>
+                                    <option value="severe">Severe</option>
+                                    <option value="life_threatening">Life-Threatening</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="reaction">Clinical Reaction</label>
+                            <input type="text" id="reaction" name="reaction" class="form-control form-control-sm" placeholder="e.g., Bronchospasm, anaphylaxis, rash">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-sm btn-danger fw-semibold">Add Allergy Alert</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
     </div>
 @endif
 

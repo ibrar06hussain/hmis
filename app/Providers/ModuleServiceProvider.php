@@ -6,6 +6,10 @@ namespace App\Providers;
 
 use App\Modules\AiAssistant\Contracts\AiGatewayInterface;
 use App\Modules\AiAssistant\Services\DisabledAiGateway;
+use App\Modules\Appointments\Models\Appointment;
+use App\Modules\Appointments\Policies\AppointmentPolicy;
+use App\Modules\Emr\Models\Encounter;
+use App\Modules\Emr\Policies\EncounterPolicy;
 use App\Modules\Pacs\Contracts\PacsGatewayInterface;
 use App\Modules\Pacs\Services\NullPacsGateway;
 use App\Modules\Patient\Models\Patient;
@@ -25,5 +29,7 @@ class ModuleServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Patient::class, PatientPolicy::class);
+        Gate::policy(Appointment::class, AppointmentPolicy::class);
+        Gate::policy(Encounter::class, EncounterPolicy::class);
     }
 }

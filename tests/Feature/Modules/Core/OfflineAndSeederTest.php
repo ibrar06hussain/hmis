@@ -43,6 +43,13 @@ class OfflineAndSeederTest extends TestCase
         $patient = Patient::query()->firstOrFail();
         $profileHtml = $this->actingAs($consultant)->get(route('patients.show', $patient))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $profileHtml);
+
+        $opdHtml = $this->actingAs($consultant)->get(route('opd.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $opdHtml);
+
+        $encounter = $patient->encounters()->firstOrFail();
+        $encounterHtml = $this->actingAs($consultant)->get(route('encounters.show', $encounter))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $encounterHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

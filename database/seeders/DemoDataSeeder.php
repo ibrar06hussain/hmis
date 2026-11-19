@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Modules\Appointments\Services\AppointmentService;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Models\PatientAllergy;
+use App\Modules\Emr\Services\ClinicalNoteService;
+use App\Modules\Emr\Services\VitalSignService;
 use App\Modules\Iam\Models\StaffProfile;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Organization\Models\Facility;
@@ -136,8 +139,34 @@ class DemoDataSeeder extends Seeder
             'study_date' => Carbon::now('UTC')->subHour(),
         ]);
 
-        // Synthetic Patient 2: Pediatric cardiac patient with guardian
-        $registration->register([
+        // Sample vitals and signed cardiology note on synthetic Patient 1's OPD encounter
+        app(VitalSignService::class)->record($enc1, [
+            'systolic_bp' => 152,
+            'diastolic_bp' => 94,
+            'heart_rate' => 84,
+            'respiratory_rate' => 16,
+            'temperature_c' => 36.7,
+            'spo2_percent' => 97,
+            'weight_kg' => 78.0,
+            'height_cm' => 172.0,
+            'rhythm_note' => 'Regular',
+        ], $consultantUser);
+
+        $note1 = app(ClinicalNoteService::class)->createDraft($enc1, [
+            'note_type' => 'cardiology_eval',
+            'nyha_class' => 'II',
+            'chest_pain_type' => 'typical_angina',
+            'chief_complaint' => 'Exertional substernal chest discomfort for 2 weeks',
+            'history_of_present_illness' => 'Synthetic history: Retrosternal tightness on walking uphill, relieved within 5 minutes of rest.',
+            'physical_examination' => 'S1+S2 audible, no murmur, lungs clear, no pedal edema.',
+            'assessment_and_diagnosis' => 'Suspected stable ischemic heart disease; uncontrolled stage 1 hypertension.',
+            'treatment_plan' => 'Optimize antihypertensive regimen, lipid profile, HbA1c, and exercise tolerance / CT coronary evaluation (note contrast dye allergy).',
+            'ecg_summary' => 'Normal sinus rhythm, LVH by voltage criteria, no acute ST elevation.',
+        ], $consultantUser);
+        app(ClinicalNoteService::class)->sign($note1, $consultantUser);
+
+        // Synthetic Patient 2: Pediatric cardiac patient with guardian + today's OPD appointment
+        $p2 = $registration->register([
             'registration_type' => Patient::REG_STANDARD,
             'full_name' => 'Fatima Batool (Synthetic)',
             'father_or_spouse_name' => 'Shabir Ahmed',
@@ -153,6 +182,15 @@ class DemoDataSeeder extends Seeder
             'emergency_contact_relationship' => 'Father',
             'emergency_contact_phone' => '0312-5550202',
             'emergency_contact_cnic' => '71101-2000002-3',
+        ], $receptionUser);
+
+        app(AppointmentService::class)->book([
+            'patient_id' => $p2->id,
+            'department_id' => $departments['CARD-OPD']->id,
+            'clinician_staff_id' => $consultantUser->staffProfile->id,
+            'appointment_date' => Carbon::now(config('hmis.display_timezone', 'Asia/Karachi'))->toDateString(),
+            'visit_type' => 'follow_up',
+            'chief_complaint' => 'Pediatric cardiac murmur follow-up & echo review',
         ], $receptionUser);
 
         // Synthetic Patient 3: Fast-track Emergency patient without CNIC (unverified identity)
