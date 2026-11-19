@@ -52,6 +52,7 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->forget('hmis_2fa_passed');
 
         /** @var User $user */
         $user = Auth::user();
@@ -65,6 +66,10 @@ class AuthController extends Controller
             actor: $user,
             subject: $user,
         );
+
+        if ($user->hasTwoFactorEnabled()) {
+            return redirect()->route('two-factor.challenge');
+        }
 
         return redirect()->intended(route('dashboard'));
     }

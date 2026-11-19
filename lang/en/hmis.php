@@ -1,0 +1,45 @@
+<?php
+
+return [
+    'facility_name' => 'Cardiac Hospital Gilgit',
+    'subtitle' => 'Hospital Management Information System (HMIS)',
+    'nav' => [
+        'dashboard' => 'Dashboard',
+        'mpi' => 'Master Patient Index',
+        'register_patient' => 'Register Patient',
+        'emergency_intake' => 'Emergency Intake',
+        'merge_patients' => 'Merge Patients',
+        'opd' => 'OPD & Appointments',
+        'emergency_triage' => 'Emergency & STEMI Triage',
+        'ipd' => 'Wards, Beds & IPD',
+        'nursing' => 'Nursing & MAR',
+        'icu' => 'ICU Bedside Telemetry',
+        'cardiac_procedures' => 'Cath Lab & Cardiac OT',
+        'lis' => 'Laboratory (LIS)',
+        'ris' => 'Radiology & PACS (RIS)',
+        'pharmacy' => 'Hospital Pharmacy',
+        'billing' => 'Billing & Ledger',
+        'rosters' => 'Duty Rosters',
+        'reports' => 'Executive Reports',
+        'ai_governance' => 'AI Governance',
+        'security_2fa' => '2FA Security',
+    ],
+    'actions' => [
+        'sign_in' => 'Sign In to HMIS',
+        'sign_out' => 'Sign Out',
+        'find' => 'Find',
+        'search_placeholder' => 'Search MRN, CNIC, Phone, Name (/)',
+    ],
+    'auth' => [
+        'username_or_email' => 'Staff Username or Email',
+        'password' => 'Password',
+        'remember' => 'Keep session active on this hospital workstation',
+        'audit_notice' => 'Authorized clinical & hospital personnel only. All access is audited.',
+        'two_factor_title' => 'Two-Factor Authentication (TOTP)',
+        'two_factor_prompt' => 'Enter the 6-digit code from your offline authenticator app, or a single-use recovery code.',
+        'verify_code' => 'Verify & Continue',
+    ],
+    'status' => [
+        'offline_lan' => 'LAN Offline Ready',
+    ],
+];

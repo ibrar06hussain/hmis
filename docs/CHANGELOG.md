@@ -3,6 +3,11 @@
 
 All notable milestones are documented chronologically.
 
+### [0.7.0] — 2026-11-20 (Urdu RTL Localization Scaffolding & Offline TOTP Two-Factor Authentication)
+- Added bilingual **English (`en`) & Urdu (`ur`)** localization scaffolding (`lang/en/hmis.php`, `lang/ur/hmis.php`), `SetHmisLocale` middleware, `POST /locale` switcher, and offline RTL CSS rules (`[dir="rtl"]`) with zero external web fonts or CDNs.
+- Added pure-PHP offline **RFC 6238 TOTP Two-Factor Authentication** (`TotpService`, encrypted `two_factor_secret` & hashed single-use `two_factor_recovery_codes` on `users`), `/security/two-factor` enrollment & disablement workflow, throttled `/two-factor/challenge` login gate, and `EnsureTwoFactorVerified` middleware with optional mandatory enforcement (`HMIS_2FA_ENFORCED=true`) for privileged hospital roles (`it_administrator`, `administrator`, `medical_superintendent`, `hospital_director`, `consultant`).
+- Added immutable audit logging for `security.2fa.enrolled`, `security.2fa.disabled`, `auth.2fa_verified`, `auth.2fa_recovery_used`, and `auth.2fa_failed`.
+
 ### [0.6.0] — 2026-11-20 (Phase 6.2 & Phase 7 Foundations: Cath Lab/Cardiac OT, ICU Telemetry & AI Governance)
 - Added Cath Lab PCI & Cardiac Surgery Operation Theatre module (`/cardiology/procedures`): `PROC-YYYY-NNNNNN` scheduling, contrast allergy alert, mandatory WHO Surgical Safety Checklist enforcement prior to Consultant sign-off, stent/graft/fluoroscopy structured logging, and HL7 FHIR R4 `Procedure` endpoint (`/api/fhir/r4/Procedure/{uuid}`).
 - Added ICU / CCU Bedside Device Telemetry module (`/icu`, `POST /api/v1/icu/telemetry/ingest`): stages monitor/ventilator/pump observations strictly as `unverified_raw`, flags abnormal readings and sensor disconnections, and requires explicit nurse/clinician verification or artifact rejection.

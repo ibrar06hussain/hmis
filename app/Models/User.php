@@ -16,8 +16,20 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['uuid', 'name', 'username', 'email', 'password', 'is_active', 'last_login_at', 'last_login_ip'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable([
+    'uuid',
+    'name',
+    'username',
+    'email',
+    'password',
+    'is_active',
+    'last_login_at',
+    'last_login_ip',
+    'two_factor_secret',
+    'two_factor_recovery_codes',
+    'two_factor_confirmed_at',
+])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -28,6 +40,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
             'is_active' => 'boolean',
             'password' => 'hashed',
         ];
@@ -50,5 +65,17 @@ class User extends Authenticatable
     public function departmentId(): ?int
     {
         return $this->staffProfile?->department_id;
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return ! empty($this->two_factor_secret) && $this->two_factor_confirmed_at !== null;
+    }
+
+    public function requiresPrivilegedTwoFactor(): bool
+    {
+        $privileged = (array) config('hmis.two_factor_privileged_roles', []);
+
+        return $this->hasAnyRole($privileged);
     }
 }

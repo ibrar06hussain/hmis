@@ -82,6 +82,30 @@ body {
     min-height: 40px;
 }
 
+/* Offline Urdu (ur) RTL localization scaffolding */
+[dir="rtl"] body {
+    font-family: 'Segoe UI', 'Nirmala UI', Tahoma, system-ui, -apple-system, sans-serif;
+    line-height: 1.65;
+}
+
+[dir="rtl"] .hmis-allergy-strip {
+    border-left: 0;
+    border-right: 5px solid var(--chg-danger);
+}
+
+[dir="rtl"] .hmis-allergy-strip-safe {
+    border-left: 0;
+    border-right: 5px solid #15803d;
+}
+
+[dir="rtl"] .hmis-sidebar .nav-link {
+    text-align: right;
+}
+
+[dir="rtl"] .text-end {
+    text-align: left !important;
+}
+
 @media print {
     .no-print {
         display: none !important;

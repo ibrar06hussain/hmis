@@ -5,11 +5,13 @@ declare(strict_types=1);
 use App\Modules\AiAssistant\Http\Controllers\AiGovernanceController;
 use App\Modules\Billing\Http\Controllers\BillingDeskController;
 use App\Modules\Cardiology\Http\Controllers\CardiacProcedureController;
+use App\Modules\Core\Http\Controllers\LocaleController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Hr\Http\Controllers\DutyRosterController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
+use App\Modules\Iam\Http\Controllers\TwoFactorController;
 use App\Modules\Icu\Http\Controllers\IcuTelemetryController;
 use App\Modules\Ipd\Http\Controllers\IpdController;
 use App\Modules\Lis\Http\Controllers\LisWorkbenchController;
@@ -27,6 +29,8 @@ Route::get('/', function () {
         : redirect()->route('login');
 });
 
+Route::post('/locale', [LocaleController::class, 'switch'])->name('locale.switch');
+
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
@@ -34,6 +38,17 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/two-factor/challenge', [TwoFactorController::class, 'showChallenge'])->name('two-factor.challenge');
+    Route::post('/two-factor/challenge', [TwoFactorController::class, 'verifyChallenge'])
+        ->middleware('throttle:10,1')
+        ->name('two-factor.verify');
+
+    Route::prefix('security/two-factor')->name('security.two-factor.')->group(function (): void {
+        Route::get('/', [TwoFactorController::class, 'showSetup'])->name('show');
+        Route::post('/confirm', [TwoFactorController::class, 'confirmSetup'])->name('confirm');
+        Route::delete('/', [TwoFactorController::class, 'disable'])->name('disable');
+    });
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

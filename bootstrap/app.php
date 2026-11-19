@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureTwoFactorVerified;
+use App\Http\Middleware\SetHmisLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo('/login');
+        $middleware->web(append: [
+            SetHmisLocale::class,
+            EnsureTwoFactorVerified::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

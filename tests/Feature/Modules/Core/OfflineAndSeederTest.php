@@ -36,6 +36,11 @@ class OfflineAndSeederTest extends TestCase
         $loginHtml = $this->get('/login')->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $loginHtml);
 
+        $urduLoginHtml = $this->withSession(['hmis_locale' => 'ur'])->get('/login')->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $urduLoginHtml);
+        $this->assertStringContainsString('dir="rtl"', (string) $urduLoginHtml);
+        $this->flushSession();
+
         $consultant = User::query()->where('username', 'consultant')->firstOrFail();
         $dashboardHtml = $this->actingAs($consultant)->get('/dashboard')->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $dashboardHtml);
@@ -89,6 +94,9 @@ class OfflineAndSeederTest extends TestCase
 
         $aiHtml = $this->actingAs($ms)->get(route('ai.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $aiHtml);
+
+        $twoFactorHtml = $this->actingAs($consultant)->get(route('security.two-factor.show'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $twoFactorHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

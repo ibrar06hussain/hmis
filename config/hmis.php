@@ -37,6 +37,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Two-Factor Authentication (Offline RFC 6238 TOTP)
+    |--------------------------------------------------------------------------
+    */
+    'two_factor_enforced' => (bool) env('HMIS_2FA_ENFORCED', false),
+    'two_factor_privileged_roles' => [
+        'it_administrator',
+        'administrator',
+        'medical_superintendent',
+        'hospital_director',
+        'consultant',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Localization (English default, Urdu RTL supported)
+    |--------------------------------------------------------------------------
+    */
+    'supported_locales' => ['en', 'ur'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Future Integration Feature Gates (Explicitly Disabled by Default)
     |--------------------------------------------------------------------------
     */
