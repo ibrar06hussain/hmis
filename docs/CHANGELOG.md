@@ -3,6 +3,14 @@
 
 All notable milestones are documented chronologically.
 
+### [0.8.0] — 2026-11-20 (Offline SVG QR 2FA, Bilingual Printable Clinical/Billing Documents & Audit/Break-Glass Console)
+- Added 100% offline local SVG QR code renderer (`App\Support\OfflineQrSvg` backed by `bacon/bacon-qr-code`) embedded inline on `/security/two-factor` for zero-internet TOTP authenticator scanning, as well as on printable clinical and financial documents.
+- Added printable bilingual **English & Urdu** hospital documents:
+  - Cardiac Inpatient **Discharge Summary** (`GET /ipd/admissions/{admission}/discharge-summary`) with active allergies, ICD-10/ICD-11 diagnoses, prescribed medications, hospital course, follow-up plan, bilingual cardiac emergency red-flag warnings, and consultant signature block.
+  - **OPD Token & Visit Slip** (`GET /opd/appointments/{appointment}/slip`) with offline QR code and bilingual clinic instructions.
+  - **Official Hospital / OPD Fee Receipt** (`GET /billing/invoices/{invoice}/receipt`) with itemized tariffs, Govt/Sehat Card/Zakat waivers, immutable ledger receipt numbers, and `VOIDED` watermark protection.
+- Added **Admin Audit Log Viewer & Break-Glass Oversight Console** (`/admin/audit-logs`, gated strictly by `audit.view_logs` for Medical Superintendent, Hospital Director, Administrator, and IT Administrator) with security KPIs, multi-criteria filtering & quick presets, and immediate audited early revocation (`POST /admin/break-glass/{breakGlassLog}/revoke`) recording `security.break_glass.revoked`.
+
 ### [0.7.0] — 2026-11-20 (Urdu RTL Localization Scaffolding & Offline TOTP Two-Factor Authentication)
 - Added bilingual **English (`en`) & Urdu (`ur`)** localization scaffolding (`lang/en/hmis.php`, `lang/ur/hmis.php`), `SetHmisLocale` middleware, `POST /locale` switcher, and offline RTL CSS rules (`[dir="rtl"]`) with zero external web fonts or CDNs.
 - Added pure-PHP offline **RFC 6238 TOTP Two-Factor Authentication** (`TotpService`, encrypted `two_factor_secret` & hashed single-use `two_factor_recovery_codes` on `users`), `/security/two-factor` enrollment & disablement workflow, throttled `/two-factor/challenge` login gate, and `EnsureTwoFactorVerified` middleware with optional mandatory enforcement (`HMIS_2FA_ENFORCED=true`) for privileged hospital roles (`it_administrator`, `administrator`, `medical_superintendent`, `hospital_director`, `consultant`).

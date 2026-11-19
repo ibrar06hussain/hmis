@@ -12,6 +12,7 @@ use App\Modules\Appointments\Services\AppointmentService;
 use App\Modules\Iam\Models\StaffProfile;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Patient\Models\Patient;
+use App\Support\OfflineQrSvg;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -140,5 +141,26 @@ class OpdQueueController extends Controller
         }
 
         return back()->with('warning', "Appointment Token {$appointment->formattedToken()} cancelled.");
+    }
+
+    public function visitSlip(Appointment $appointment): View
+    {
+        Gate::authorize('viewAny', Appointment::class);
+
+        $appointment->load(['patient', 'department', 'clinician.user', 'encounter']);
+
+        return view('modules.opd.visit-slip', [
+            'appointment' => $appointment,
+            'qrSvg' => OfflineQrSvg::render(
+                sprintf(
+                    'CHG-OPD|%s|%s|%s',
+                    $appointment->patient->mrn,
+                    $appointment->formattedToken(),
+                    $appointment->appointment_date->format('Y-m-d')
+                ),
+                110,
+                1
+            ),
+        ]);
     }
 }

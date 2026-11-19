@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\AiAssistant\Http\Controllers\AiGovernanceController;
+use App\Modules\Audit\Http\Controllers\AuditOversightController;
 use App\Modules\Billing\Http\Controllers\BillingDeskController;
 use App\Modules\Cardiology\Http\Controllers\CardiacProcedureController;
 use App\Modules\Core\Http\Controllers\LocaleController;
@@ -70,6 +71,7 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('opd')->name('opd.')->group(function (): void {
         Route::get('/', [OpdQueueController::class, 'index'])->name('index');
         Route::post('/appointments', [OpdQueueController::class, 'store'])->name('appointments.store');
+        Route::get('/appointments/{appointment}/slip', [OpdQueueController::class, 'visitSlip'])->name('appointments.slip');
         Route::post('/appointments/{appointment}/check-in', [OpdQueueController::class, 'checkIn'])->name('appointments.check-in');
         Route::post('/appointments/{appointment}/start-consult', [OpdQueueController::class, 'startConsult'])->name('appointments.start-consult');
         Route::post('/appointments/{appointment}/cancel', [OpdQueueController::class, 'cancel'])->name('appointments.cancel');
@@ -84,6 +86,7 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('ipd')->name('ipd.')->group(function (): void {
         Route::get('/', [IpdController::class, 'index'])->name('index');
         Route::post('/admit', [IpdController::class, 'admit'])->name('admit');
+        Route::get('/admissions/{admission}/discharge-summary', [IpdController::class, 'dischargeSummary'])->name('admissions.discharge-summary');
         Route::post('/admissions/{admission}/transfer', [IpdController::class, 'transferBed'])->name('admissions.transfer');
         Route::post('/admissions/{admission}/discharge', [IpdController::class, 'discharge'])->name('admissions.discharge');
         Route::post('/beds/{bed}/mark-available', [IpdController::class, 'markBedAvailable'])->name('beds.mark-available');
@@ -132,8 +135,14 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('billing')->name('billing.')->group(function (): void {
         Route::get('/', [BillingDeskController::class, 'index'])->name('index');
         Route::post('/invoices', [BillingDeskController::class, 'storeInvoice'])->name('invoices.store');
+        Route::get('/invoices/{invoice}/receipt', [BillingDeskController::class, 'receipt'])->name('invoices.receipt');
         Route::post('/invoices/{invoice}/pay', [BillingDeskController::class, 'recordPayment'])->name('invoices.pay');
         Route::post('/invoices/{invoice}/void', [BillingDeskController::class, 'voidInvoice'])->name('invoices.void');
+    });
+
+    Route::prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/audit-logs', [AuditOversightController::class, 'index'])->name('audit-logs.index');
+        Route::post('/break-glass/{breakGlassLog}/revoke', [AuditOversightController::class, 'revokeBreakGlass'])->name('break-glass.revoke');
     });
 
     Route::prefix('rosters')->name('rosters.')->group(function (): void {

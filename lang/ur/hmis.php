@@ -22,6 +22,7 @@ return [
         'rosters' => 'اسٹاف ڈیوٹی روسٹر',
         'reports' => 'انتظامی رپورٹس',
         'ai_governance' => 'اے آئی گورننس',
+        'audit_logs' => 'آڈٹ اور بریک گلاس',
         'security_2fa' => 'دوہری تصدیق (2FA)',
     ],
     'actions' => [

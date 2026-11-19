@@ -36,4 +36,9 @@ class IpdAdmissionPolicy
     {
         return $user->can('bed.manage');
     }
+
+    public function viewSummary(User $user, IpdAdmission $admission): bool
+    {
+        return $this->viewAny($user) || $user->can('patient.view_clinical_profile');
+    }
 }

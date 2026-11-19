@@ -49,10 +49,17 @@
     <div class="col-lg-7">
         <div class="hmis-card p-4">
             @if(! $user->hasTwoFactorEnabled())
-                <h2 class="h5 fw-bold mb-3">Step 1: Register Offline Authenticator App</h2>
+                <h2 class="h5 fw-bold mb-3">Step 1: Scan Local Offline QR Code or Enter Secret</h2>
                 <p class="small text-muted">
-                    Add a new TOTP account in any offline RFC 6238 authenticator app (e.g., Aegis, FreeOTP, Google Authenticator, or hardware token programmer) using the Base32 secret key below:
+                    Scan this locally rendered SVG QR code using any offline RFC 6238 authenticator app (e.g., Aegis, FreeOTP, Google Authenticator, or Microsoft Authenticator), or enter the Base32 secret key manually:
                 </p>
+
+                @if(! empty($qrSvg))
+                    <div class="d-flex flex-column align-items-center p-3 mb-3 rounded bg-white border">
+                        <div aria-label="TOTP Authenticator QR Code">{!! $qrSvg !!}</div>
+                        <small class="text-muted mt-2"><i class="bi bi-hdd-network me-1 text-success"></i>Rendered locally as inline SVG (zero external QR API calls)</small>
+                    </div>
+                @endif
 
                 <div class="mb-3">
                     <label class="form-label small fw-semibold text-uppercase text-muted">Base32 Secret Key (Manual Entry)</label>

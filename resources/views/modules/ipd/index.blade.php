@@ -93,6 +93,11 @@
                                 <td>{{ $adm->admission_diagnosis }}</td>
                                 <td>{{ \App\Support\DateTimeHelper::formatDateTime($adm->admitted_at, 'd M, H:i') }}</td>
                                 <td class="text-end text-nowrap">
+                                    @can('viewSummary', $adm)
+                                        <a href="{{ route('ipd.admissions.discharge-summary', $adm) }}" class="btn btn-sm btn-outline-secondary" title="Printable Bilingual Summary">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    @endcan
                                     @can('view', $adm->encounter)
                                         <a href="{{ route('encounters.show', $adm->encounter) }}" class="btn btn-sm btn-outline-primary">Chart</a>
                                     @endcan
@@ -194,6 +199,45 @@
                 </table>
             </div>
         </div>
+
+        @if(isset($recentDischarges) && $recentDischarges->isNotEmpty())
+            <div class="hmis-card p-3 mt-4">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-3"><i class="bi bi-file-earmark-medical me-2 text-success"></i>Recent Discharges — Printable Bilingual Summaries</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Admission #</th>
+                                <th>Patient (MRN)</th>
+                                <th>Outcome</th>
+                                <th>Discharged (PKT)</th>
+                                <th class="text-end">Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($recentDischarges as $discharged)
+                                <tr>
+                                    <td class="font-monospace fw-semibold">{{ $discharged->admission_number }}</td>
+                                    <td>
+                                        <div class="fw-semibold">{{ $discharged->patient->full_name }}</div>
+                                        <span class="text-muted hmis-mrn-badge">{{ $discharged->patient->mrn }}</span>
+                                    </td>
+                                    <td><span class="badge bg-secondary text-uppercase">{{ str_replace('_', ' ', $discharged->status) }}</span></td>
+                                    <td>{{ \App\Support\DateTimeHelper::formatDateTime($discharged->discharged_at, 'd M Y, H:i') }}</td>
+                                    <td class="text-end">
+                                        @can('viewSummary', $discharged)
+                                            <a href="{{ route('ipd.admissions.discharge-summary', $discharged) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-printer me-1"></i>Discharge Summary
+                                            </a>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Admit Patient Panel --}}

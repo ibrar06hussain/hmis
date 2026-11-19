@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Iam\Services\TotpService;
+use App\Support\OfflineQrSvg;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -28,6 +29,7 @@ class TwoFactorController extends Controller
 
         $pendingSecret = null;
         $provisioningUri = null;
+        $qrSvg = null;
 
         if (! $user->hasTwoFactorEnabled()) {
             $pendingSecret = (string) $request->session()->get('hmis_2fa_pending_secret');
@@ -36,12 +38,14 @@ class TwoFactorController extends Controller
                 $request->session()->put('hmis_2fa_pending_secret', $pendingSecret);
             }
             $provisioningUri = $this->totpService->provisioningUri($user->username ?: $user->email, $pendingSecret);
+            $qrSvg = OfflineQrSvg::render($provisioningUri, 200);
         }
 
         return view('modules.iam.two-factor-setup', [
             'user' => $user,
             'pendingSecret' => $pendingSecret,
             'provisioningUri' => $provisioningUri,
+            'qrSvg' => $qrSvg,
             'newRecoveryCodes' => session('hmis_2fa_new_recovery_codes', []),
         ]);
     }

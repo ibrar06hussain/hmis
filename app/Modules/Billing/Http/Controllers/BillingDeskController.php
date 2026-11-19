@@ -11,6 +11,7 @@ use App\Modules\Billing\Models\Invoice;
 use App\Modules\Billing\Models\ServiceTariff;
 use App\Modules\Billing\Services\BillingService;
 use App\Modules\Patient\Models\Patient;
+use App\Support\OfflineQrSvg;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -139,5 +140,26 @@ class BillingDeskController extends Controller
         return redirect()
             ->route('billing.index')
             ->with('warning', "Invoice {$invoice->invoice_number} voided with compensating ledger reversal.");
+    }
+
+    public function receipt(Invoice $invoice): View
+    {
+        Gate::authorize('manage', Invoice::class);
+
+        $invoice->load(['patient', 'items', 'issuedBy', 'ledgerEntries.recordedBy', 'encounter.department']);
+
+        return view('modules.billing.receipt', [
+            'invoice' => $invoice,
+            'qrSvg' => OfflineQrSvg::render(
+                sprintf(
+                    'CHG-RECEIPT|%s|%s|PKR:%.2f',
+                    $invoice->invoice_number,
+                    $invoice->patient->mrn,
+                    $invoice->net_payable_pkr
+                ),
+                104,
+                1
+            ),
+        ]);
     }
 }

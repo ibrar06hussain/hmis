@@ -9,6 +9,7 @@ use App\Modules\Appointments\Services\AppointmentService;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Models\PatientAllergy;
 use App\Modules\Emr\Services\ClinicalNoteService;
+use App\Modules\Emr\Services\EncounterNumberGeneratorService;
 use App\Modules\Emr\Services\VitalSignService;
 use App\Modules\Iam\Models\StaffProfile;
 use App\Modules\Organization\Models\Department;
@@ -107,7 +108,7 @@ class DemoDataSeeder extends Seeder
         ], $receptionUser);
 
         $enc1 = Encounter::query()->create([
-            'encounter_number' => 'ENC-2026-000001',
+            'encounter_number' => app(EncounterNumberGeneratorService::class)->generate(),
             'patient_id' => $p1->id,
             'department_id' => $departments['CARD-OPD']->id,
             'attending_staff_id' => $consultantUser->staffProfile->id,
@@ -207,7 +208,7 @@ class DemoDataSeeder extends Seeder
         ], $erUser);
 
         Encounter::query()->create([
-            'encounter_number' => 'ENC-2026-000002',
+            'encounter_number' => app(EncounterNumberGeneratorService::class)->generate(),
             'patient_id' => $p3->id,
             'department_id' => $departments['CARD-ER']->id,
             'attending_staff_id' => $erUser->staffProfile->id,

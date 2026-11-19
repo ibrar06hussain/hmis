@@ -13,6 +13,7 @@ use App\Modules\Ipd\Services\IpdAdmissionService;
 use App\Modules\Organization\Models\Bed;
 use App\Modules\Organization\Models\Ward;
 use App\Modules\Patient\Models\Patient;
+use App\Support\OfflineQrSvg;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -42,6 +43,13 @@ class IpdController extends Controller
             ->orderByDesc('admitted_at')
             ->get();
 
+        $recentDischarges = IpdAdmission::query()
+            ->with(['patient', 'ward', 'bed', 'encounter', 'attendingStaff.user', 'dischargedBy'])
+            ->where('status', '!=', IpdAdmission::STATUS_ADMITTED)
+            ->orderByDesc('discharged_at')
+            ->limit(15)
+            ->get();
+
         $availableBeds = Bed::query()
             ->with('ward')
             ->where('status', 'available')
@@ -64,6 +72,7 @@ class IpdController extends Controller
         return view('modules.ipd.index', [
             'wards' => $wards,
             'activeAdmissions' => $activeAdmissions,
+            'recentDischarges' => $recentDischarges,
             'availableBeds' => $availableBeds,
             'activePatients' => $activePatients,
             'clinicians' => $clinicians,
@@ -160,5 +169,35 @@ class IpdController extends Controller
         }
 
         return back()->with('status', "Bed {$bed->bed_number} marked Available.");
+    }
+
+    public function dischargeSummary(IpdAdmission $admission): View
+    {
+        Gate::authorize('viewSummary', $admission);
+
+        $admission->load([
+            'patient.allergies',
+            'ward',
+            'bed',
+            'admittingDepartment',
+            'attendingStaff.user',
+            'dischargedBy',
+            'encounter.diagnoses.terminologyCode',
+            'encounter.prescriptions.items.medication',
+            'encounter.vitalSigns',
+        ]);
+
+        return view('modules.ipd.discharge-summary', [
+            'admission' => $admission,
+            'patient' => $admission->patient,
+            'diagnoses' => $admission->encounter?->diagnoses ?? collect(),
+            'prescriptions' => $admission->encounter?->prescriptions ?? collect(),
+            'latestVitals' => $admission->encounter?->vitalSigns?->first(),
+            'qrSvg' => OfflineQrSvg::render(
+                sprintf('CHG-DISCHARGE|%s|%s', $admission->admission_number, $admission->patient->mrn),
+                96,
+                1
+            ),
+        ]);
     }
 }

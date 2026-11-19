@@ -50,6 +50,9 @@
                                     </span>
                                 </td>
                                 <td class="text-end text-nowrap">
+                                    <a href="{{ route('billing.invoices.receipt', $inv) }}" class="btn btn-sm btn-outline-secondary me-1" title="Print Bilingual Receipt">
+                                        <i class="bi bi-printer"></i> Receipt
+                                    </a>
                                     @if(in_array($inv->status, ['issued', 'partially_paid'], true))
                                         <form method="POST" action="{{ route('billing.invoices.pay', $inv) }}" class="d-inline-flex gap-1 align-items-center">
                                             @csrf

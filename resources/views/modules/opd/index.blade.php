@@ -93,6 +93,9 @@
                                     @endif
                                 </td>
                                 <td class="text-end text-nowrap">
+                                    <a href="{{ route('opd.appointments.slip', $appt) }}" class="btn btn-sm btn-outline-secondary" title="Print Bilingual OPD Token Slip">
+                                        <i class="bi bi-printer"></i> Slip
+                                    </a>
                                     @if($appt->status === 'booked')
                                         @can('checkIn', $appt)
                                             <form method="POST" action="{{ route('opd.appointments.check-in', $appt) }}" class="d-inline">

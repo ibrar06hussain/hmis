@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Audit\Models;
 
 use App\Models\User;
+use App\Modules\Patient\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -40,5 +41,10 @@ class AuditLog extends Model
     public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'actor_user_id');
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
     }
 }

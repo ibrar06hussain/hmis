@@ -97,6 +97,10 @@ class OfflineAndSeederTest extends TestCase
 
         $twoFactorHtml = $this->actingAs($consultant)->get(route('security.two-factor.show'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $twoFactorHtml);
+        $this->assertStringContainsString('<svg', (string) $twoFactorHtml);
+
+        $auditHtml = $this->actingAs($ms)->get(route('admin.audit-logs.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $auditHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

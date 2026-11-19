@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Audit\Models;
 
 use App\Models\User;
+use App\Modules\Patient\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class BreakGlassLog extends Model
@@ -42,5 +44,15 @@ class BreakGlassLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isAfter(Carbon::now('UTC'));
     }
 }

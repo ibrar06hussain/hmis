@@ -12,6 +12,7 @@ use App\Modules\Lis\Models\LabOrder;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Pacs\Models\ImagingStudy;
 use App\Modules\Patient\Models\Patient;
+use App\Modules\Pharmacy\Models\Prescription;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -105,5 +106,10 @@ class Encounter extends Model
     public function imagingStudies(): HasMany
     {
         return $this->hasMany(ImagingStudy::class)->orderByDesc('created_at');
+    }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class)->orderByDesc('prescribed_at');
     }
 }

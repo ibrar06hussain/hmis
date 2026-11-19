@@ -126,6 +126,11 @@
                     <i class="bi bi-shield-lock-fill text-warning"></i> {{ __('hmis.nav.ai_governance') }} ({{ config('hmis.ai.enabled') ? 'Draft' : 'Off' }})
                 </a>
             @endif
+            @can('audit.view_logs')
+                <a href="{{ route('admin.audit-logs.index') }}" class="nav-link {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}">
+                    <i class="bi bi-journal-text text-danger"></i> {{ __('hmis.nav.audit_logs') }}
+                </a>
+            @endcan
             <a href="{{ route('security.two-factor.show') }}" class="nav-link {{ request()->routeIs('security.two-factor.*') ? 'active' : '' }}">
                 <i class="bi bi-key-fill {{ auth()->user()?->hasTwoFactorEnabled() ? 'text-success' : 'text-info' }}"></i> {{ __('hmis.nav.security_2fa') }}
             </a>
@@ -233,6 +238,9 @@
             @endcan
             @can('viewAny', \App\Modules\Ipd\Models\IpdAdmission::class)
                 <a href="{{ route('ipd.index') }}" class="nav-link"><i class="bi bi-hospital-fill"></i> {{ __('hmis.nav.ipd') }}</a>
+            @endcan
+            @can('audit.view_logs')
+                <a href="{{ route('admin.audit-logs.index') }}" class="nav-link"><i class="bi bi-journal-text text-danger"></i> {{ __('hmis.nav.audit_logs') }}</a>
             @endcan
             <a href="{{ route('security.two-factor.show') }}" class="nav-link"><i class="bi bi-key-fill text-info"></i> {{ __('hmis.nav.security_2fa') }}</a>
         </nav>

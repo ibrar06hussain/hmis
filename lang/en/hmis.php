@@ -22,6 +22,7 @@ return [
         'rosters' => 'Duty Rosters',
         'reports' => 'Executive Reports',
         'ai_governance' => 'AI Governance',
+        'audit_logs' => 'Audit & Break-Glass',
         'security_2fa' => '2FA Security',
     ],
     'actions' => [

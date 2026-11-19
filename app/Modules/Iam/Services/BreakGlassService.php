@@ -62,4 +62,33 @@ final class BreakGlassService
             return $log;
         });
     }
+
+    public function revoke(BreakGlassLog $grant, User $actor, string $reason): BreakGlassLog
+    {
+        $now = Carbon::now('UTC');
+
+        return DB::transaction(function () use ($grant, $actor, $reason, $now): BreakGlassLog {
+            $locked = BreakGlassLog::query()->whereKey($grant->id)->lockForUpdate()->firstOrFail();
+
+            if (! $locked->isActive()) {
+                throw new \DomainException('This break-glass override has already expired or been revoked.');
+            }
+
+            $previousExpiresAt = $locked->expires_at?->toIso8601String();
+            $locked->expires_at = $now;
+            $locked->save();
+
+            $this->auditLogger->log(
+                action: 'security.break_glass.revoked',
+                actor: $actor,
+                subject: $locked,
+                patientId: $locked->patient_id,
+                oldValues: ['expires_at' => $previousExpiresAt],
+                newValues: ['expires_at' => $now->toIso8601String(), 'revoked_by' => $actor->username],
+                reason: $reason,
+            );
+
+            return $locked->fresh(['user', 'patient']);
+        });
+    }
 }
