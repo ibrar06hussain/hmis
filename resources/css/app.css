@@ -1,0 +1,92 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+    --chg-navy: #0b2545;
+    --chg-navy-dark: #071930;
+    --chg-teal: #0f766e;
+    --chg-accent: #1d4ed8;
+    --chg-surface: #f4f7fb;
+    --chg-border: #d8e2ee;
+    --chg-danger: #b91c1c;
+    --chg-warning: #b45309;
+}
+
+body {
+    background-color: var(--chg-surface);
+    color: #102033;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.94rem;
+}
+
+.hmis-sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--chg-navy) 0%, var(--chg-navy-dark) 100%);
+    color: #e2ecf7;
+}
+
+.hmis-sidebar .nav-link {
+    color: rgba(226, 236, 247, 0.85);
+    border-radius: 0.45rem;
+    padding: 0.55rem 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.hmis-sidebar .nav-link:hover,
+.hmis-sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.hmis-topbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--chg-border);
+}
+
+.hmis-card {
+    background-color: #ffffff;
+    border: 1px solid var(--chg-border);
+    border-radius: 0.65rem;
+    box-shadow: 0 1px 2px rgba(11, 37, 69, 0.04);
+}
+
+.hmis-patient-banner {
+    background: linear-gradient(135deg, #0b2545 0%, #133c68 100%);
+    color: #ffffff;
+    border-radius: 0.7rem;
+}
+
+.hmis-mrn-badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+}
+
+.hmis-allergy-strip {
+    background-color: #fef2f2;
+    border-left: 5px solid var(--chg-danger);
+    color: #7f1d1d;
+}
+
+.hmis-allergy-strip-safe {
+    background-color: #f0fdf4;
+    border-left: 5px solid #15803d;
+    color: #14532d;
+}
+
+.btn-touch {
+    min-height: 40px;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+    }
+}
