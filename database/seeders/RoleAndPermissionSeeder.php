@@ -39,6 +39,7 @@ class RoleAndPermissionSeeder extends Seeder
         'ris.order.create',
         'ris.report.enter',
         'ris.report.verify',
+        'pharmacy.prescribe',
         'pharmacy.dispense',
         'billing.manage',
         'audit.view_logs',
@@ -73,6 +74,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'patient.register_override_duplicate',
                 'patient.update_demographics',
                 'patient.merge',
+                'billing.manage',
                 'iam.manage_users',
                 'audit.view_logs',
             ],
@@ -92,6 +94,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'lis.order.create',
                 'lis.critical.acknowledge',
                 'ris.order.create',
+                'pharmacy.prescribe',
                 'iam.break_glass',
             ],
             'medical_officer' => [
@@ -108,6 +111,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'lis.order.create',
                 'lis.critical.acknowledge',
                 'ris.order.create',
+                'pharmacy.prescribe',
                 'iam.break_glass',
             ],
             'nurse' => [

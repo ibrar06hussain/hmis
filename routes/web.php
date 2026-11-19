@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Modules\Billing\Http\Controllers\BillingDeskController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Iam\Http\Controllers\AuthController;
@@ -10,6 +11,7 @@ use App\Modules\Ipd\Http\Controllers\IpdController;
 use App\Modules\Lis\Http\Controllers\LisWorkbenchController;
 use App\Modules\Opd\Http\Controllers\OpdQueueController;
 use App\Modules\Patient\Http\Controllers\PatientController;
+use App\Modules\Pharmacy\Http\Controllers\PharmacyWorkbenchController;
 use App\Modules\Ris\Http\Controllers\RisWorkbenchController;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +84,18 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/studies/{study}/report', [RisWorkbenchController::class, 'saveReport'])->name('studies.report');
     });
 
+    Route::prefix('pharmacy')->name('pharmacy.')->group(function (): void {
+        Route::get('/', [PharmacyWorkbenchController::class, 'index'])->name('index');
+        Route::post('/items/{item}/dispense', [PharmacyWorkbenchController::class, 'dispense'])->name('items.dispense');
+    });
+
+    Route::prefix('billing')->name('billing.')->group(function (): void {
+        Route::get('/', [BillingDeskController::class, 'index'])->name('index');
+        Route::post('/invoices', [BillingDeskController::class, 'storeInvoice'])->name('invoices.store');
+        Route::post('/invoices/{invoice}/pay', [BillingDeskController::class, 'recordPayment'])->name('invoices.pay');
+        Route::post('/invoices/{invoice}/void', [BillingDeskController::class, 'voidInvoice'])->name('invoices.void');
+    });
+
     Route::prefix('encounters')->name('encounters.')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');
         Route::post('/{encounter}/vitals', [EncounterWorkspaceController::class, 'storeVitals'])->name('vitals.store');
@@ -92,6 +106,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/{encounter}/diagnoses', [EncounterWorkspaceController::class, 'storeDiagnosis'])->name('diagnoses.store');
         Route::post('/{encounter}/lab-orders', [LisWorkbenchController::class, 'storeOrder'])->name('lab-orders.store');
         Route::post('/{encounter}/imaging-orders', [RisWorkbenchController::class, 'storeOrder'])->name('imaging-orders.store');
+        Route::post('/{encounter}/prescriptions', [PharmacyWorkbenchController::class, 'storePrescription'])->name('prescriptions.store');
         Route::post('/{encounter}/complete', [EncounterWorkspaceController::class, 'complete'])->name('complete');
     });
 });

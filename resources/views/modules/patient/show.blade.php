@@ -116,6 +116,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link {{ $activeTab === 'medications' ? 'active fw-semibold' : '' }}" href="{{ route('patients.show', [$patient, 'tab' => 'medications']) }}">
+                <i class="bi bi-capsule-pill me-1"></i>Medications
+                <span class="badge bg-secondary ms-1">{{ $patient->prescriptions->count() }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link {{ $activeTab === 'allergies' ? 'active fw-semibold' : '' }}" href="{{ route('patients.show', [$patient, 'tab' => 'allergies']) }}">
                 <i class="bi bi-shield-plus me-1"></i>Allergies &amp; Conditions
             </a>
@@ -388,6 +394,33 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+@elseif($activeTab === 'medications')
+    <div class="hmis-card p-3">
+        <h2 class="h6 fw-bold border-bottom pb-2 mb-3">Prescriptions &amp; Medication History</h2>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr><th>Rx #</th><th>Medication</th><th>Regimen</th><th>Qty</th><th>Status</th><th>Prescribed (PKT)</th></tr>
+                </thead>
+                <tbody>
+                    @forelse($patient->prescriptions as $rx)
+                        @foreach($rx->items as $rxItem)
+                            <tr>
+                                <td class="font-monospace fw-semibold">{{ $rx->prescription_number }}</td>
+                                <td><strong>{{ $rxItem->medication->generic_name }}</strong> {{ $rxItem->medication->strength }}</td>
+                                <td>{{ $rxItem->dose }} {{ $rxItem->route }} {{ $rxItem->frequency }} &times; {{ $rxItem->duration_days }}d</td>
+                                <td>{{ $rxItem->quantity_dispensed }} / {{ $rxItem->quantity_prescribed }}</td>
+                                <td><span class="badge {{ $rxItem->status === 'dispensed' ? 'bg-success' : 'bg-secondary' }} text-uppercase">{{ $rxItem->status }}</span></td>
+                                <td>{{ \App\Support\DateTimeHelper::formatDateTime($rx->prescribed_at) }}</td>
+                            </tr>
+                        @endforeach
+                    @empty
+                        <tr><td colspan="6" class="text-center text-muted py-3">No prescriptions recorded yet.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 @elseif($activeTab === 'allergies')

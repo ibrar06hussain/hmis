@@ -7,6 +7,8 @@ namespace App\Modules\Patient\Services;
 use App\Models\User;
 use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Audit\Services\AuditLogger;
+use App\Modules\Billing\Models\FinancialLedgerEntry;
+use App\Modules\Billing\Models\Invoice;
 use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
@@ -22,6 +24,7 @@ use App\Modules\Patient\Models\Patient;
 use App\Modules\Patient\Models\PatientContact;
 use App\Modules\Patient\Models\PatientIdentifier;
 use App\Modules\Patient\Models\PatientMerge;
+use App\Modules\Pharmacy\Models\Prescription;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -73,6 +76,9 @@ final class PatientMergeService
                 'lab_orders' => LabOrder::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'specimens' => Specimen::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'imaging_studies' => ImagingStudy::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'prescriptions' => Prescription::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'invoices' => Invoice::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
+                'financial_ledger_entries' => FinancialLedgerEntry::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id]),
                 'contacts' => PatientContact::query()->where('patient_id', $lockedSource->id)->update(['patient_id' => $lockedTarget->id, 'is_primary' => false]),
             ];
 

@@ -133,6 +133,8 @@ class PatientController extends Controller
                 'labOrders.items.test',
                 'labOrders.items.verifiedBy',
                 'labOrders.items.criticalAcknowledgedBy',
+                'prescriptions.items.medication',
+                'prescriptions.prescribedBy',
                 'imagingStudies',
             ]);
         }

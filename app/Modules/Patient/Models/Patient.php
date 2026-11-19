@@ -6,6 +6,7 @@ namespace App\Modules\Patient\Models;
 
 use App\Models\User;
 use App\Modules\Appointments\Models\Appointment;
+use App\Modules\Billing\Models\Invoice;
 use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
@@ -16,6 +17,7 @@ use App\Modules\Ipd\Models\IpdAdmission;
 use App\Modules\Lis\Models\LabOrder;
 use App\Modules\Organization\Models\Facility;
 use App\Modules\Pacs\Models\ImagingStudy;
+use App\Modules\Pharmacy\Models\Prescription;
 use App\Support\CnicNormalizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -192,6 +194,16 @@ class Patient extends Model
     public function labOrders(): HasMany
     {
         return $this->hasMany(LabOrder::class)->orderByDesc('ordered_at');
+    }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class)->orderByDesc('prescribed_at');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class)->orderByDesc('issued_at');
     }
 
     public function allergies(): HasMany

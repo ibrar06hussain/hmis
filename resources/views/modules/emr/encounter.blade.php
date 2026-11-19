@@ -277,6 +277,66 @@
                 </form>
             </div>
         @endcan
+
+        @can('prescribe', \App\Modules\Pharmacy\Models\Prescription::class)
+            <div class="hmis-card p-3 mt-3">
+                <h2 class="h6 fw-bold border-bottom pb-2 mb-2"><i class="bi bi-capsule-pill me-2 text-primary"></i>Prescribe Cardiac Medication</h2>
+                <form method="POST" action="{{ route('encounters.prescriptions.store', $encounter) }}">
+                    @csrf
+                    <div class="mb-2">
+                        <select name="medication_id" class="form-select form-select-sm" required>
+                            <option value="">Select formulary medication...</option>
+                            @foreach($medications as $med)
+                                <option value="{{ $med->id }}" @selected((int) old('medication_id') === $med->id)>
+                                    {{ $med->generic_name }} {{ $med->strength }} ({{ $med->dosage_form }}) — Stock: {{ $med->stock_quantity }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4"><input type="text" name="dose" value="{{ old('dose', '1 tab') }}" class="form-control form-control-sm" placeholder="Dose" required></div>
+                        <div class="col-4">
+                            <select name="route" class="form-select form-select-sm">
+                                <option value="PO">PO (Oral)</option>
+                                <option value="SL">SL (Sublingual)</option>
+                                <option value="IV">IV</option>
+                                <option value="SC">SC</option>
+                                <option value="IM">IM</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <select name="frequency" class="form-select form-select-sm">
+                                <option value="OD">OD</option>
+                                <option value="BD">BD</option>
+                                <option value="TDS">TDS</option>
+                                <option value="QID">QID</option>
+                                <option value="STAT">STAT</option>
+                                <option value="PRN">PRN</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4"><input type="number" min="1" name="duration_days" value="{{ old('duration_days', 14) }}" class="form-control form-control-sm" placeholder="Days" required></div>
+                        <div class="col-4"><input type="number" min="1" name="quantity_prescribed" value="{{ old('quantity_prescribed', 14) }}" class="form-control form-control-sm" placeholder="Qty" required></div>
+                        <div class="col-4"><input type="text" name="instructions" value="{{ old('instructions') }}" class="form-control form-control-sm" placeholder="After meal"></div>
+                    </div>
+
+                    @if(session('allergy_conflict'))
+                        <div class="alert alert-danger py-2 px-2 small mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="confirm_allergy_override" value="1" id="confirm_allergy_override">
+                                <label class="form-check-label fw-bold" for="confirm_allergy_override">Override Active Drug Allergy (Audited)</label>
+                            </div>
+                            <input type="text" name="allergy_override_reason" class="form-control form-control-sm mt-1" placeholder="Mandatory clinical justification for override">
+                        </div>
+                    @endif
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sm btn-primary fw-semibold">Issue Prescription</button>
+                    </div>
+                </form>
+            </div>
+        @endcan
     </div>
 
     {{-- Right Column: Structured Cardiology Clinical Note & Immutable Revision History --}}

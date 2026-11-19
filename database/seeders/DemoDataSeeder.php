@@ -41,6 +41,8 @@ class DemoDataSeeder extends Seeder
             ['name' => 'Zainab Ali', 'username' => 'reception', 'email' => 'reception@chg.demo.local', 'role' => 'receptionist', 'dept' => 'MRO', 'emp' => 'CHG-REC-008', 'designation' => 'Senior Registration Clerk', 'license' => null],
             ['name' => 'Nurse Rozina Shah', 'username' => 'nurse_ccu', 'email' => 'nurse.ccu@chg.demo.local', 'role' => 'nurse', 'dept' => 'CCU', 'emp' => 'CHG-NUR-021', 'designation' => 'Charge Nurse (CCU)', 'license' => 'PNC-GB-10293'],
             ['name' => 'Dr. Farman Ullah', 'username' => 'ms', 'email' => 'ms@chg.demo.local', 'role' => 'medical_superintendent', 'dept' => 'ADMIN-IT', 'emp' => 'CHG-MS-001', 'designation' => 'Medical Superintendent', 'license' => 'PMDC-GB-18201'],
+            ['name' => 'Riaz Ahmed (Pharmacist)', 'username' => 'pharmacist', 'email' => 'pharmacy@chg.demo.local', 'role' => 'pharmacist', 'dept' => 'PHARM', 'emp' => 'CHG-PH-001', 'designation' => 'Chief Pharmacist', 'license' => 'PC-GB-3012'],
+            ['name' => 'Saeed Khan (Billing)', 'username' => 'billing', 'email' => 'billing@chg.demo.local', 'role' => 'billing_officer', 'dept' => 'BILLING', 'emp' => 'CHG-BIL-001', 'designation' => 'Billing & Accounts Officer', 'license' => null],
             ['name' => 'Tariq Hussain', 'username' => 'admin', 'email' => 'admin@chg.demo.local', 'role' => 'administrator', 'dept' => 'ADMIN-IT', 'emp' => 'CHG-ADM-001', 'designation' => 'Hospital Administrator', 'license' => null],
             ['name' => 'Kamran Abbas', 'username' => 'it_admin', 'email' => 'it@chg.demo.local', 'role' => 'it_administrator', 'dept' => 'ADMIN-IT', 'emp' => 'CHG-IT-001', 'designation' => 'System Administrator', 'license' => null],
         ];

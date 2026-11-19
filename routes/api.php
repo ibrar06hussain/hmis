@@ -7,6 +7,7 @@ use App\Modules\Devices\Http\Controllers\Api\AnalyzerIngestApiController;
 use App\Modules\Fhir\Http\Controllers\FhirConditionController;
 use App\Modules\Fhir\Http\Controllers\FhirDiagnosticReportController;
 use App\Modules\Fhir\Http\Controllers\FhirEncounterController;
+use App\Modules\Fhir\Http\Controllers\FhirMedicationRequestController;
 use App\Modules\Fhir\Http\Controllers\FhirPatientController;
 use App\Modules\Patient\Http\Controllers\Api\PatientApiController;
 use App\Modules\Terminology\Http\Controllers\Api\TerminologyApiController;
@@ -35,4 +36,5 @@ Route::prefix('fhir/r4')->middleware('auth:sanctum')->name('api.fhir.r4.')->grou
     Route::get('/Encounter/{uuid}', [FhirEncounterController::class, 'show'])->name('encounter.show');
     Route::get('/Condition/{uuid}', [FhirConditionController::class, 'show'])->name('condition.show');
     Route::get('/DiagnosticReport/{uuid}', [FhirDiagnosticReportController::class, 'show'])->name('diagnostic-report.show');
+    Route::get('/MedicationRequest/{uuid}', [FhirMedicationRequestController::class, 'show'])->name('medication-request.show');
 });

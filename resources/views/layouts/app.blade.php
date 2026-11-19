@@ -80,9 +80,22 @@
                 </a>
             @endcan
 
+            @can('viewWorkbench', \App\Modules\Pharmacy\Models\Prescription::class)
+                <a href="{{ route('pharmacy.index') }}" class="nav-link {{ request()->routeIs('pharmacy.*') ? 'active' : '' }}">
+                    <i class="bi bi-capsule-pill"></i> Hospital Pharmacy
+                </a>
+            @endcan
+
+            @can('manage', \App\Modules\Billing\Models\Invoice::class)
+                <a href="{{ route('billing.index') }}" class="nav-link {{ request()->routeIs('billing.*') ? 'active' : '' }}">
+                    <i class="bi bi-receipt-cutoff"></i> Billing &amp; Ledger
+                </a>
+            @endcan
+
             <hr class="border-light border-opacity-25 my-2">
-            <div class="px-2 small text-uppercase text-white-50 fw-semibold">Upcoming Modules</div>
-            <span class="nav-link disabled opacity-50"><i class="bi bi-capsule"></i> Pharmacy &amp; Billing (Phase 4)</span>
+            <div class="px-2 small text-uppercase text-white-50 fw-semibold">Future Integration Phases</div>
+            <span class="nav-link disabled opacity-50"><i class="bi bi-cpu"></i> PACS / OHIF &amp; ICU (Phase 6)</span>
+            <span class="nav-link disabled opacity-50"><i class="bi bi-stars"></i> AI Draft Assist (Disabled)</span>
         </nav>
 
         <div class="pt-3 border-top border-light border-opacity-25 small text-white-50">

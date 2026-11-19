@@ -62,6 +62,13 @@ class OfflineAndSeederTest extends TestCase
 
         $risHtml = $this->actingAs($consultant)->get(route('ris.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $risHtml);
+
+        $pharmHtml = $this->actingAs($consultant)->get(route('pharmacy.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $pharmHtml);
+
+        $billingOfficer = User::query()->where('username', 'billing')->firstOrFail();
+        $billingHtml = $this->actingAs($billingOfficer)->get(route('billing.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $billingHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

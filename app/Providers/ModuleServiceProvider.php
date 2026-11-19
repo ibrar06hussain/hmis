@@ -8,6 +8,8 @@ use App\Modules\AiAssistant\Contracts\AiGatewayInterface;
 use App\Modules\AiAssistant\Services\DisabledAiGateway;
 use App\Modules\Appointments\Models\Appointment;
 use App\Modules\Appointments\Policies\AppointmentPolicy;
+use App\Modules\Billing\Models\Invoice;
+use App\Modules\Billing\Policies\InvoicePolicy;
 use App\Modules\Emergency\Models\EmergencyTriage;
 use App\Modules\Emergency\Policies\EmergencyTriagePolicy;
 use App\Modules\Emr\Models\Encounter;
@@ -21,6 +23,8 @@ use App\Modules\Pacs\Models\ImagingStudy;
 use App\Modules\Pacs\Services\NullPacsGateway;
 use App\Modules\Patient\Models\Patient;
 use App\Modules\Patient\Policies\PatientPolicy;
+use App\Modules\Pharmacy\Models\Prescription;
+use App\Modules\Pharmacy\Policies\PrescriptionPolicy;
 use App\Modules\Ris\Policies\ImagingStudyPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -43,5 +47,7 @@ class ModuleServiceProvider extends ServiceProvider
         Gate::policy(IpdAdmission::class, IpdAdmissionPolicy::class);
         Gate::policy(LabOrder::class, LabOrderPolicy::class);
         Gate::policy(ImagingStudy::class, ImagingStudyPolicy::class);
+        Gate::policy(Prescription::class, PrescriptionPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
     }
 }
