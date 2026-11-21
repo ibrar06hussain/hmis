@@ -10,7 +10,7 @@ class NursingPolicy
 {
     public function viewWorkbench(User $user): bool
     {
-        return $user->can('emr.vitals.record') || $user->can('patient.view_all_clinical_governance');
+        return $user->hasAnyRole(['nurse', 'medical_superintendent']);
     }
 
     public function record(User $user): bool

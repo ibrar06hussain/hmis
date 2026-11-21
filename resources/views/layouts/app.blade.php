@@ -56,11 +56,11 @@
                 </a>
             @endcan
 
-            @can('emr.vitals.record')
+            @if(auth()->user()?->can('emr.vitals.record') && auth()->user()?->hasAnyRole(['nurse', 'medical_officer', 'medical_superintendent']))
                 <a href="{{ route('opd.pre-consult.index') }}" class="nav-link {{ request()->routeIs('opd.pre-consult.*') ? 'active' : '' }}">
                     <i class="bi bi-heart-pulse text-warning"></i> {{ __('hmis.nav.pre_consult') }}
                 </a>
-            @endcan
+            @endif
 
             @can('emr.note.sign')
                 <a href="{{ route('emr.cosign.index') }}" class="nav-link {{ request()->routeIs('emr.cosign.*') ? 'active' : '' }}">
@@ -125,7 +125,7 @@
                 </a>
             @endcan
 
-            @can('viewAny', \App\Modules\Hr\Models\DutyRoster::class)
+            @can('manage', \App\Modules\Hr\Models\DutyRoster::class)
                 <a href="{{ route('rosters.index') }}" class="nav-link {{ request()->routeIs('rosters.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar-week-fill"></i> {{ __('hmis.nav.rosters') }}
                 </a>
@@ -138,13 +138,13 @@
             @endcan
 
             <hr class="border-light border-opacity-25 my-2">
-            <div class="px-2 small text-uppercase text-white-50 fw-semibold">Governance &amp; Security</div>
-            @if(auth()->user()?->can('audit.view_logs') || auth()->user()?->can('emr.note.sign'))
+            <div class="px-2 small text-uppercase text-white-50 fw-semibold">
+                @can('audit.view_logs') Governance &amp; Security @else Account Security @endcan
+            </div>
+            @can('audit.view_logs')
                 <a href="{{ route('ai.index') }}" class="nav-link {{ request()->routeIs('ai.*') ? 'active' : '' }}">
                     <i class="bi bi-shield-lock-fill text-warning"></i> {{ __('hmis.nav.ai_governance') }} ({{ config('hmis.ai.enabled') ? 'Draft' : 'Off' }})
                 </a>
-            @endif
-            @can('audit.view_logs')
                 <a href="{{ route('admin.audit-logs.index') }}" class="nav-link {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}">
                     <i class="bi bi-journal-text text-danger"></i> {{ __('hmis.nav.audit_logs') }}
                 </a>
@@ -251,11 +251,20 @@
             @can('viewAny', \App\Modules\Appointments\Models\Appointment::class)
                 <a href="{{ route('opd.index') }}" class="nav-link"><i class="bi bi-calendar2-check-fill"></i> {{ __('hmis.nav.opd') }}</a>
             @endcan
+            @can('emr.note.sign')
+                <a href="{{ route('emr.cosign.index') }}" class="nav-link"><i class="bi bi-pen-fill text-info"></i> {{ __('hmis.nav.cosign_tray') }}</a>
+            @endcan
+            @can('emr.note.create')
+                <a href="{{ route('emr.favorites.index') }}" class="nav-link"><i class="bi bi-bookmark-star-fill text-success"></i> {{ __('hmis.nav.order_sets') }}</a>
+            @endcan
             @can('viewAny', \App\Modules\Emergency\Models\EmergencyTriage::class)
                 <a href="{{ route('emergency.index') }}" class="nav-link"><i class="bi bi-heart-pulse-fill text-danger"></i> {{ __('hmis.nav.emergency_triage') }}</a>
             @endcan
             @can('viewAny', \App\Modules\Ipd\Models\IpdAdmission::class)
                 <a href="{{ route('ipd.index') }}" class="nav-link"><i class="bi bi-hospital-fill"></i> {{ __('hmis.nav.ipd') }}</a>
+            @endcan
+            @can('viewWorkbench', \App\Modules\Cardiology\Models\CardiacProcedure::class)
+                <a href="{{ route('cardiology.procedures.index') }}" class="nav-link"><i class="bi bi-heart-fill text-danger"></i> {{ __('hmis.nav.cardiac_procedures') }}</a>
             @endcan
             @can('audit.view_logs')
                 <a href="{{ route('admin.audit-logs.index') }}" class="nav-link"><i class="bi bi-journal-text text-danger"></i> {{ __('hmis.nav.audit_logs') }}</a>

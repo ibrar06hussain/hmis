@@ -62,13 +62,16 @@ class OfflineAndSeederTest extends TestCase
         $ipdHtml = $this->actingAs($consultant)->get(route('ipd.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $ipdHtml);
 
-        $lisHtml = $this->actingAs($consultant)->get(route('lis.index'))->assertOk()->getContent();
+        $labTech = User::query()->where('username', 'lab_tech')->firstOrFail();
+        $lisHtml = $this->actingAs($labTech)->get(route('lis.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $lisHtml);
 
-        $risHtml = $this->actingAs($consultant)->get(route('ris.index'))->assertOk()->getContent();
+        $radiologist = User::query()->where('username', 'radiologist')->firstOrFail();
+        $risHtml = $this->actingAs($radiologist)->get(route('ris.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $risHtml);
 
-        $pharmHtml = $this->actingAs($consultant)->get(route('pharmacy.index'))->assertOk()->getContent();
+        $pharmacist = User::query()->where('username', 'pharmacist')->firstOrFail();
+        $pharmHtml = $this->actingAs($pharmacist)->get(route('pharmacy.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $pharmHtml);
 
         $billingOfficer = User::query()->where('username', 'billing')->firstOrFail();

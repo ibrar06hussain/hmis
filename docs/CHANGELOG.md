@@ -12,8 +12,11 @@ All notable milestones are documented chronologically.
   - Added **Pre-Consult Nursing / Junior MO Vitals & Risk Triage Station** (`/opd/pre-consult`) to capture BP/HR/SpO2, cardiac risk factors, chief complaint, and allergies outside the consultant's room.
   - Added **Consultant 1-Click Co-Sign Tray** (`/emr/cosign`, gated to `emr.note.sign`) for verifying and digitally signing MO/scribe-drafted notes in one click.
   - Added **Per-Doctor Personal Favorite Order Sets** (`/emr/favorites`) with non-destructive archiving and doctor-scoped visibility.
-- **Phase 3 — Governance-Gated Offline Voice / Dictation → Structured `[DRAFT]`:**
+- **Phase 3 — Governance-Gated Offline Voice / Shorthand Dictation → Structured `[DRAFT]`:**
   - Added `VoiceTranscriptionGatewayInterface`, `OfflineDictationParserService`, and `POST /encounters/{encounter}/rapid/dictate-draft` routed through `AiGovernanceService` (`HMIS_AI_ENABLED=false` kill switch by default, prompt-injection scanning, mandatory `[DRAFT]` watermarking, advisory-only protocol highlighting, zero automatic prescribing/signing, and immutable `ai_interaction_logs`).
+- **Role-Focused Consultant Clinic Workspace:**
+  - Added dedicated Consultant Clinic Dashboard (`resources/views/dashboard/consultant.blade.php`) showing Today's OPD Queue with 1-click Rapid 60s Consult buttons, Pending Co-Sign count, and Active Inpatients/CCU rounds.
+  - Scoped sidebar navigation and workbench policies (`LabOrderPolicy`, `ImagingStudyPolicy`, `PrescriptionPolicy`, `NursingPolicy`, `PreConsultController`, `AiGovernanceController`) so Consultants see and access strictly Consultant-related clinical pages without Lab/RIS/Pharmacy/Nursing/Billing/Admin clutter.
 
 ### [0.8.0] — 2026-11-20 (Offline SVG QR 2FA, Bilingual Printable Clinical/Billing Documents & Audit/Break-Glass Console)
 - Added 100% offline local SVG QR code renderer (`App\Support\OfflineQrSvg` backed by `bacon/bacon-qr-code`) embedded inline on `/security/two-factor` for zero-internet TOTP authenticator scanning, as well as on printable clinical and financial documents.

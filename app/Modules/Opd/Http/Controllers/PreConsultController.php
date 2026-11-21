@@ -49,7 +49,11 @@ class PreConsultController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        abort_unless($user->can('emr.vitals.record'), 403, 'Pre-consult assessment requires emr.vitals.record permission.');
+        abort_unless(
+            $user->can('emr.vitals.record') && $user->hasAnyRole(['nurse', 'medical_officer', 'medical_superintendent']),
+            403,
+            'Pre-consult assessment station is restricted to OPD Nurses and Medical Officers.'
+        );
 
         $todayPkt = Carbon::now(config('hmis.display_timezone', 'Asia/Karachi'))->toDateString();
 

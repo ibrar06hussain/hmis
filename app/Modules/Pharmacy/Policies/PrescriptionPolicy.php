@@ -10,7 +10,7 @@ class PrescriptionPolicy
 {
     public function viewWorkbench(User $user): bool
     {
-        return $user->can('pharmacy.dispense') || $user->can('pharmacy.prescribe');
+        return $user->can('pharmacy.dispense');
     }
 
     public function prescribe(User $user): bool

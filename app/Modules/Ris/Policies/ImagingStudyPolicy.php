@@ -10,8 +10,7 @@ class ImagingStudyPolicy
 {
     public function viewWorkbench(User $user): bool
     {
-        return $user->can('ris.order.create')
-            || $user->can('ris.report.enter')
+        return $user->can('ris.report.enter')
             || $user->can('ris.report.verify');
     }
 

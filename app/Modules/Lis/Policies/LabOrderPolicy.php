@@ -12,8 +12,7 @@ class LabOrderPolicy
     {
         return $user->can('lis.specimen.collect')
             || $user->can('lis.result.enter')
-            || $user->can('lis.result.verify')
-            || $user->can('lis.order.create');
+            || $user->can('lis.result.verify');
     }
 
     public function create(User $user): bool

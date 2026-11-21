@@ -26,8 +26,8 @@ class AiGovernanceController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if (! $user->can('audit.view_logs') && ! $user->can('emr.note.sign')) {
-            abort(403, 'AI Governance console is restricted to authorized governance & senior clinical roles.');
+        if (! $user->can('audit.view_logs')) {
+            abort(403, 'AI Governance console is restricted to authorized governance & administrative roles.');
         }
 
         return view('modules.ai.index', [
