@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Modules\AiAssistant\Contracts\AiGatewayInterface;
 use App\Modules\AiAssistant\Models\AiInteractionLog;
 use App\Modules\Audit\Services\AuditLogger;
+use App\Modules\Emr\Models\Encounter;
 use App\Modules\Patient\Models\Patient;
 use Illuminate\Support\Carbon;
 
@@ -29,6 +30,7 @@ final class AiGovernanceService
         'draft_discharge_summary',
         'summarize_lab_trends',
         'check_missing_documentation',
+        'dictation_to_structured_draft',
     ];
 
     /** @var list<string> */
@@ -56,6 +58,7 @@ final class AiGovernanceService
     public function __construct(
         private readonly AiGatewayInterface $gateway,
         private readonly AuditLogger $auditLogger,
+        private readonly OfflineDictationParserService $dictationParser,
     ) {}
 
     /**
@@ -145,6 +148,73 @@ final class AiGovernanceService
             'status' => 'draft_generated',
             'draft' => $draft,
             'message' => 'Draft generated for clinician review (never finalized automatically).',
+            'log' => $log,
+        ];
+    }
+
+    /**
+     * Governance-gated offline Voice/Text Dictation -> Structured [DRAFT] pre-filler.
+     * NEVER writes clinical notes, diagnoses, or prescriptions directly.
+     *
+     * @return array{allowed: bool, status: string, fields: ?array<string, mixed>, message: string, log: AiInteractionLog}
+     */
+    public function parseDictationToStructuredDraft(
+        User $actor,
+        Encounter $encounter,
+        string $transcript,
+    ): array {
+        $startedAt = microtime(true);
+        $patient = $encounter->patient;
+        $toolName = 'dictation_to_structured_draft';
+
+        if (! $this->gateway->isEnabled()) {
+            $log = $this->recordLog($actor, $patient, $toolName, 'blocked_disabled', $transcript, null, $startedAt);
+
+            return [
+                'allowed' => false,
+                'status' => 'blocked_disabled',
+                'fields' => null,
+                'message' => 'Offline Voice-to-Draft AI Assistant is disabled by hospital policy (HMIS_AI_ENABLED=false).',
+                'log' => $log,
+            ];
+        }
+
+        if (! $actor->can('viewClinicalProfile', $patient) || ! $actor->can('createNote', $encounter)) {
+            $log = $this->recordLog($actor, $patient, $toolName, 'blocked_unauthorized', $transcript, null, $startedAt);
+
+            return [
+                'allowed' => false,
+                'status' => 'blocked_unauthorized',
+                'fields' => null,
+                'message' => 'Actor lacks clinical documentation authorization for this encounter.',
+                'log' => $log,
+            ];
+        }
+
+        $lowerTranscript = strtolower($transcript);
+        foreach (self::PROMPT_INJECTION_PATTERNS as $pattern) {
+            if (str_contains($lowerTranscript, $pattern)) {
+                $log = $this->recordLog($actor, $patient, $toolName, 'blocked_prompt_injection', $transcript, null, $startedAt);
+
+                return [
+                    'allowed' => false,
+                    'status' => 'blocked_prompt_injection',
+                    'fields' => null,
+                    'message' => 'Prompt injection directive detected in dictated transcript; parsing blocked and audited.',
+                    'log' => $log,
+                ];
+            }
+        }
+
+        $parsed = $this->dictationParser->parse($transcript);
+        $summary = '[DRAFT — REQUIRES AUTHORIZED CLINICIAN REVIEW] Parsed structured cardiology draft (suggested protocol: '.($parsed['suggested_order_set_code'] ?? 'none').').';
+        $log = $this->recordLog($actor, $patient, $toolName, 'draft_generated', $transcript, $summary, $startedAt);
+
+        return [
+            'allowed' => true,
+            'status' => 'draft_generated',
+            'fields' => $parsed,
+            'message' => 'Structured [DRAFT] pre-filled for clinician review. Nothing has been saved or signed.',
             'log' => $log,
         ];
     }

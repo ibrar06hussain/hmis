@@ -101,6 +101,21 @@ class OfflineAndSeederTest extends TestCase
 
         $auditHtml = $this->actingAs($ms)->get(route('admin.audit-logs.index'))->assertOk()->getContent();
         $this->assertNoExternalCdns((string) $auditHtml);
+
+        $rapidHtml = $this->actingAs($consultant)->get(route('encounters.rapid.show', $encounter))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $rapidHtml);
+
+        $rxPrintHtml = $this->actingAs($consultant)->get(route('encounters.prescription.print', $encounter))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $rxPrintHtml);
+
+        $preConsultHtml = $this->actingAs($nurse)->get(route('opd.pre-consult.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $preConsultHtml);
+
+        $cosignHtml = $this->actingAs($consultant)->get(route('emr.cosign.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $cosignHtml);
+
+        $favHtml = $this->actingAs($consultant)->get(route('emr.favorites.index'))->assertOk()->getContent();
+        $this->assertNoExternalCdns((string) $favHtml);
     }
 
     private function assertNoExternalCdns(string $html): void

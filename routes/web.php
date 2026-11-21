@@ -175,6 +175,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');
         Route::get('/{encounter}/rapid', [RapidConsultController::class, 'show'])->name('rapid.show');
         Route::post('/{encounter}/rapid', [RapidConsultController::class, 'store'])->name('rapid.store');
+        Route::post('/{encounter}/rapid/dictate-draft', [RapidConsultController::class, 'dictateDraft'])->name('rapid.dictate-draft');
         Route::get('/{encounter}/prescription-print', [RapidConsultController::class, 'printPrescription'])->name('prescription.print');
         Route::post('/{encounter}/vitals', [EncounterWorkspaceController::class, 'storeVitals'])->name('vitals.store');
         Route::post('/{encounter}/notes', [EncounterWorkspaceController::class, 'storeNote'])->name('notes.store');

@@ -81,12 +81,43 @@
             <button type="button"
                     class="btn btn-sm {{ $set['is_personal'] ? 'btn-outline-success' : 'btn-outline-primary' }} fw-semibold rapid-bundle-btn"
                     data-bundle-index="{{ $index }}"
+                    data-bundle-code="{{ $set['code'] ?? '' }}"
                     title="{{ $set['description'] }}">
                 @if($set['is_personal'])<i class="bi bi-bookmark-star-fill me-1"></i>@endif
                 {{ $set['name'] }}
             </button>
         @endforeach
     </div>
+</div>
+
+{{-- Phase 3: Governance-Gated Offline Voice / Shorthand Dictation -> Structured [DRAFT] --}}
+<div class="hmis-card p-3 mb-3 {{ config('hmis.ai.enabled') ? 'border-info' : '' }}">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="small fw-bold">
+            <i class="bi bi-mic-fill text-primary me-1"></i>Offline Voice / Shorthand Dictation &rarr; Structured [DRAFT]
+            @if(config('hmis.ai.enabled'))
+                <span class="badge bg-info text-dark ms-1">DRAFT ASSISTANT ACTIVE (HUMAN REVIEW REQUIRED)</span>
+            @else
+                <span class="badge bg-secondary ms-1">OFF BY POLICY (HMIS_AI_ENABLED=false)</span>
+            @endif
+        </div>
+        @if(config('hmis.ai.enabled'))
+            <div class="d-flex gap-2">
+                <button type="button" id="btn-voice-mic" class="btn btn-sm btn-outline-danger py-0 px-2">
+                    <i class="bi bi-mic me-1"></i>Speak (Local Mic)
+                </button>
+                <button type="button" id="btn-parse-dictation" class="btn btn-sm btn-primary py-0 px-2">
+                    <i class="bi bi-magic me-1"></i>Parse into [DRAFT] Fields
+                </button>
+            </div>
+        @endif
+    </div>
+    @if(config('hmis.ai.enabled'))
+        <div class="mt-2">
+            <textarea id="dictation-transcript" rows="2" class="form-control form-control-sm" placeholder="Speak or dictate shorthand (e.g., Known HTN DM, exertional chest pain NYHA II, BP 154/92, HR 86, SpO2 97, S1+S2+0 chest clear, NSR, advise DAPT and follow up in 4 weeks)..."></textarea>
+            <div id="dictation-status" class="small mt-1 d-none"></div>
+        </div>
+    @endif
 </div>
 
 <form method="POST" action="{{ route('encounters.rapid.store', $encounter) }}" id="rapid-consult-form">
@@ -507,6 +538,85 @@
             }
         });
     });
+
+    // Phase 3: Governance-Gated Voice / Dictation -> Structured [DRAFT] (never auto-submits!)
+    const micBtn = document.getElementById('btn-voice-mic');
+    const parseBtn = document.getElementById('btn-parse-dictation');
+    const transcriptEl = document.getElementById('dictation-transcript');
+    const statusEl = document.getElementById('dictation-status');
+
+    if (micBtn && transcriptEl) {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+            micBtn.disabled = true;
+            micBtn.title = 'Browser SpeechRecognition unavailable — type/paste transcript or configure LAN Whisper';
+        } else {
+            const rec = new SpeechRec();
+            rec.lang = 'en-US';
+            rec.interimResults = false;
+            rec.onresult = (event) => {
+                const spoken = event.results[0][0].transcript;
+                transcriptEl.value = (transcriptEl.value ? transcriptEl.value + ' ' : '') + spoken;
+            };
+            micBtn.addEventListener('click', () => rec.start());
+        }
+    }
+
+    if (parseBtn && transcriptEl) {
+        parseBtn.addEventListener('click', async () => {
+            const text = transcriptEl.value.trim();
+            if (text.length < 5) return;
+            statusEl.className = 'small mt-1 text-muted';
+            statusEl.textContent = 'Parsing offline dictation into [DRAFT] fields...';
+            try {
+                const resp = await fetch(@json(route('encounters.rapid.dictate-draft', $encounter)), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ transcript: text })
+                });
+                const data = await resp.json();
+                if (!resp.ok || !data.allowed || !data.fields) {
+                    statusEl.className = 'small mt-1 text-danger fw-semibold';
+                    statusEl.textContent = data.message || 'Dictation parsing blocked by governance policy.';
+                    return;
+                }
+                const f = data.fields;
+                if (f.chief_complaint) document.getElementById('rapid_cc').value = f.chief_complaint;
+                if (f.past_medical_history) document.getElementById('rapid_pmh').value = f.past_medical_history;
+                if (f.physical_examination) document.getElementById('rapid_exam').value = f.physical_examination;
+                if (f.ecg_summary) document.getElementById('rapid_ecg').value = f.ecg_summary;
+                if (f.assessment_and_diagnosis) document.getElementById('rapid_assessment').value = f.assessment_and_diagnosis;
+                if (f.follow_up_instructions) document.getElementById('rapid_followup').value = f.follow_up_instructions;
+                if (f.nyha_class) {
+                    const r = document.getElementById('nyha_' + f.nyha_class);
+                    if (r) r.checked = true;
+                }
+                if (f.chest_pain_type) document.getElementById('rapid_cp_type').value = f.chest_pain_type;
+                if (f.systolic_bp) document.querySelector('input[name="systolic_bp"]').value = f.systolic_bp;
+                if (f.diastolic_bp) document.querySelector('input[name="diastolic_bp"]').value = f.diastolic_bp;
+                if (f.heart_rate) document.querySelector('input[name="heart_rate"]').value = f.heart_rate;
+                if (f.spo2_percent) document.querySelector('input[name="spo2_percent"]').value = f.spo2_percent;
+
+                let hint = data.message;
+                if (f.suggested_order_set_code) {
+                    const matchBtn = document.querySelector(`.rapid-bundle-btn[data-bundle-code="${f.suggested_order_set_code}"]`);
+                    if (matchBtn) {
+                        matchBtn.classList.add('btn-warning', 'text-dark');
+                        hint += ` Suggested protocol highlighted: ${matchBtn.textContent.trim()} (click manually if clinically appropriate).`;
+                    }
+                }
+                statusEl.className = 'small mt-1 alert alert-warning py-1 px-2 mb-0';
+                statusEl.textContent = hint;
+            } catch (err) {
+                statusEl.className = 'small mt-1 text-danger';
+                statusEl.textContent = 'Offline dictation parser error.';
+            }
+        });
+    }
 
     // Keyboard shortcuts: Ctrl+Enter -> Submit & Print, Alt+N -> Next waiting patient
     document.addEventListener('keydown', (e) => {

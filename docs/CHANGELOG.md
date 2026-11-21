@@ -3,6 +3,18 @@
 
 All notable milestones are documented chronologically.
 
+### [0.9.0] — 2026-11-22 (High-Velocity 60-Second Cardiac OPD Productivity Suite — Phases 1, 2 & 3)
+- **Phase 1 — Rapid 60-Second Consult Mode & Bilingual Visual Rx:**
+  - Added single-screen atomic consultation workspace (`/encounters/{encounter}/rapid`) consolidating vitals, structured cardiology note (draft or immediately signed), coded ICD-10/ICD-11 diagnoses, multi-drug consolidated `Prescription` (`PharmacyService::prescribeBatch` with full active drug allergy rollback/override guard), lab panels, imaging orders, and encounter completion into a single DB transaction.
+  - Added `clinical_order_sets` table & `ClinicalOrderSetSeeder` with 5 hospital Cardiology Protocol Bundles (`PROTO-ACS-DAPT`, `PROTO-HTN`, `PROTO-HFREF`, `PROTO-AFIB`, `PROTO-ANGINA-WORKUP`), 1-click **Repeat Last Visit (Copy-Forward)**, tappable clinical/exam/NYHA/ECG chips, offline dot-phrase macros (`.cvs`, `.dapt`, `.htn`, `.hf`, `.fu2w`, `.erwarn`), and keyboard shortcuts (`Ctrl+Enter`, `Alt+N`).
+  - Added printable **Bilingual Urdu/English OPD Prescription** (`/encounters/{encounter}/prescription-print`) with visual **`صبح (Morning)` / `دوپہر (Noon)` / `رات (Night)`** dosing schedule, Urdu meal timing (`کھانے کے بعد` / `کھانے سے پہلے`), offline QR SVG, and cardiac red-flag warnings.
+- **Phase 2 — Team OPD Workflow & Personal Doctor Favorites:**
+  - Added **Pre-Consult Nursing / Junior MO Vitals & Risk Triage Station** (`/opd/pre-consult`) to capture BP/HR/SpO2, cardiac risk factors, chief complaint, and allergies outside the consultant's room.
+  - Added **Consultant 1-Click Co-Sign Tray** (`/emr/cosign`, gated to `emr.note.sign`) for verifying and digitally signing MO/scribe-drafted notes in one click.
+  - Added **Per-Doctor Personal Favorite Order Sets** (`/emr/favorites`) with non-destructive archiving and doctor-scoped visibility.
+- **Phase 3 — Governance-Gated Offline Voice / Dictation → Structured `[DRAFT]`:**
+  - Added `VoiceTranscriptionGatewayInterface`, `OfflineDictationParserService`, and `POST /encounters/{encounter}/rapid/dictate-draft` routed through `AiGovernanceService` (`HMIS_AI_ENABLED=false` kill switch by default, prompt-injection scanning, mandatory `[DRAFT]` watermarking, advisory-only protocol highlighting, zero automatic prescribing/signing, and immutable `ai_interaction_logs`).
+
 ### [0.8.0] — 2026-11-20 (Offline SVG QR 2FA, Bilingual Printable Clinical/Billing Documents & Audit/Break-Glass Console)
 - Added 100% offline local SVG QR code renderer (`App\Support\OfflineQrSvg` backed by `bacon/bacon-qr-code`) embedded inline on `/security/two-factor` for zero-internet TOTP authenticator scanning, as well as on printable clinical and financial documents.
 - Added printable bilingual **English & Urdu** hospital documents:

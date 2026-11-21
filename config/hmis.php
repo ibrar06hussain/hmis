@@ -70,6 +70,7 @@ return [
     'ai' => [
         'enabled' => (bool) env('HMIS_AI_ENABLED', false),
         'provider' => env('HMIS_AI_PROVIDER', 'disabled'),
+        'whisper_url' => env('HMIS_AI_WHISPER_URL'),
     ],
 
     'fhir' => [

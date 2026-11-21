@@ -6,6 +6,7 @@ namespace App\Modules\Emr\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\AiAssistant\Services\AiGovernanceService;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Services\RapidConsultService;
 use App\Modules\Lis\Models\LabTestCatalog;
@@ -14,6 +15,7 @@ use App\Modules\Pharmacy\Models\Medication;
 use App\Modules\Ris\Models\ImagingCatalog;
 use App\Modules\Terminology\Services\TerminologySearchService;
 use App\Support\OfflineQrSvg;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -180,5 +182,34 @@ class RapidConsultController extends Controller
                 1
             ),
         ]);
+    }
+
+    public function dictateDraft(Request $request, Encounter $encounter): JsonResponse
+    {
+        $validated = $request->validate([
+            'transcript' => ['required', 'string', 'min:5', 'max:2000'],
+        ]);
+
+        /** @var User $user */
+        $user = $request->user();
+        $result = app(AiGovernanceService::class)->parseDictationToStructuredDraft(
+            actor: $user,
+            encounter: $encounter,
+            transcript: (string) $validated['transcript'],
+        );
+
+        $statusCode = match ($result['status']) {
+            'draft_generated' => 200,
+            'blocked_unauthorized' => 403,
+            'blocked_disabled' => 423,
+            default => 422,
+        };
+
+        return response()->json([
+            'allowed' => $result['allowed'],
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'fields' => $result['fields'],
+        ], $statusCode);
     }
 }
