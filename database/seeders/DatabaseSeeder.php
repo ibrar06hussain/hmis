@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             TerminologySeeder::class,
             LabAndImagingCatalogSeeder::class,
             PharmacyAndBillingCatalogSeeder::class,
+            ClinicalOrderSetSeeder::class,
         ]);
 
         if (config('hmis.demo_mode') || app()->environment('local')) {

@@ -28,6 +28,7 @@ class PrescriptionItem extends Model
         'quantity_prescribed',
         'quantity_dispensed',
         'instructions',
+        'meal_timing',
         'status',
         'dispensed_by_user_id',
         'dispensed_at',

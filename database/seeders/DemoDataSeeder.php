@@ -12,6 +12,7 @@ use App\Modules\Emr\Services\ClinicalNoteService;
 use App\Modules\Emr\Services\EncounterNumberGeneratorService;
 use App\Modules\Emr\Services\VitalSignService;
 use App\Modules\Iam\Models\StaffProfile;
+use App\Modules\Lis\Services\DiagnosticSequenceService;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Organization\Models\Facility;
 use App\Modules\Pacs\Models\ImagingStudy;
@@ -132,7 +133,7 @@ class DemoDataSeeder extends Seeder
         ImagingStudy::query()->create([
             'patient_id' => $p1->id,
             'encounter_id' => $enc1->id,
-            'accession_number' => 'ACC-2026-000001',
+            'accession_number' => app(DiagnosticSequenceService::class)->next('ACC'),
             'modality' => 'ECHO',
             'procedure_name' => 'Transthoracic Echocardiogram (TTE)',
             'study_instance_uid' => '1.2.826.0.1.3680043.10.9999.20260001',

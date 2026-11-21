@@ -122,8 +122,12 @@ class OpdQueueController extends Controller
             return back()->withErrors(['appointment' => $exception->getMessage()]);
         }
 
+        $targetRoute = $request->string('mode')->toString() === 'rapid'
+            ? 'encounters.rapid.show'
+            : 'encounters.show';
+
         return redirect()
-            ->route('encounters.show', $encounter)
+            ->route($targetRoute, $encounter)
             ->with('status', "Consultation active for Encounter {$encounter->encounter_number}.");
     }
 

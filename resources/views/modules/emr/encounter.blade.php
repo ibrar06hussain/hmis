@@ -24,6 +24,14 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2 no-print">
+            @can('createNote', $encounter)
+                <a href="{{ route('encounters.rapid.show', $encounter) }}" class="btn btn-sm btn-warning fw-bold">
+                    <i class="bi bi-lightning-charge-fill me-1"></i>Rapid 60s Consult
+                </a>
+            @endcan
+            <a href="{{ route('encounters.prescription.print', $encounter) }}" class="btn btn-sm btn-light fw-semibold">
+                <i class="bi bi-printer-fill me-1"></i>Print Rx
+            </a>
             <a href="{{ route('patients.show', $patient) }}" class="btn btn-sm btn-outline-light">Unified Patient Profile</a>
             <a href="{{ route('opd.index') }}" class="btn btn-sm btn-outline-light">OPD Queue</a>
             @if($encounter->status !== 'finished')

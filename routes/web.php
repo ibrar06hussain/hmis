@@ -9,6 +9,7 @@ use App\Modules\Cardiology\Http\Controllers\CardiacProcedureController;
 use App\Modules\Core\Http\Controllers\LocaleController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
+use App\Modules\Emr\Http\Controllers\RapidConsultController;
 use App\Modules\Hr\Http\Controllers\DutyRosterController;
 use App\Modules\Iam\Http\Controllers\AuthController;
 use App\Modules\Iam\Http\Controllers\DashboardController;
@@ -159,6 +160,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('encounters')->name('encounters.')->group(function (): void {
         Route::get('/{encounter}', [EncounterWorkspaceController::class, 'show'])->name('show');
+        Route::get('/{encounter}/rapid', [RapidConsultController::class, 'show'])->name('rapid.show');
+        Route::post('/{encounter}/rapid', [RapidConsultController::class, 'store'])->name('rapid.store');
+        Route::get('/{encounter}/prescription-print', [RapidConsultController::class, 'printPrescription'])->name('prescription.print');
         Route::post('/{encounter}/vitals', [EncounterWorkspaceController::class, 'storeVitals'])->name('vitals.store');
         Route::post('/{encounter}/notes', [EncounterWorkspaceController::class, 'storeNote'])->name('notes.store');
         Route::put('/{encounter}/notes/{note}', [EncounterWorkspaceController::class, 'updateNote'])->name('notes.update');

@@ -79,6 +79,7 @@ final class PharmacyService
                 'quantity_prescribed' => (int) $data['quantity_prescribed'],
                 'quantity_dispensed' => 0,
                 'instructions' => $data['instructions'] ?? null,
+                'meal_timing' => $data['meal_timing'] ?? null,
                 'status' => PrescriptionItem::STATUS_PENDING,
             ]);
 
@@ -92,6 +93,111 @@ final class PharmacyService
                     'medication_code' => $medication->code,
                     'generic_name' => $medication->generic_name,
                     'quantity' => (int) $data['quantity_prescribed'],
+                    'allergy_override_used' => $allergyOverrideUsed,
+                ],
+                reason: $overrideReason,
+            );
+
+            return $prescription->fresh(['items.medication', 'patient', 'encounter']);
+        });
+    }
+
+    /**
+     * Prescribe multiple medications atomically under one prescription number (RX-YYYY-NNNNNN)
+     * with upfront active medication allergy checking across all items.
+     *
+     * @param  list<array<string, mixed>>  $items
+     *
+     * @throws MedicationAllergyConflictException
+     */
+    public function prescribeBatch(
+        Encounter $encounter,
+        array $items,
+        User $prescriber,
+        bool $confirmAllergyOverride = false,
+        ?string $overrideReason = null,
+        ?string $clinicalNotes = null,
+    ): Prescription {
+        if ($items === []) {
+            throw new \InvalidArgumentException('At least one medication item is required.');
+        }
+
+        $patient = $encounter->patient;
+        $activeMedAllergies = $patient->activeAllergies()->where('category', 'medication')->get();
+
+        $resolvedRows = [];
+        $allConflicts = [];
+
+        foreach ($items as $item) {
+            $medication = Medication::query()->where('is_active', true)->findOrFail((int) $item['medication_id']);
+            $conflicts = $this->detectAllergyConflicts($activeMedAllergies, $medication);
+            foreach ($conflicts as $conflict) {
+                $allConflicts[] = "{$conflict} ({$medication->generic_name})";
+            }
+            $resolvedRows[] = ['medication' => $medication, 'data' => $item];
+        }
+
+        $allConflicts = array_values(array_unique($allConflicts));
+
+        if ($allConflicts !== [] && (! $confirmAllergyOverride || trim((string) $overrideReason) === '')) {
+            throw new MedicationAllergyConflictException(
+                $allConflicts,
+                'ALLERGY CONFLICT: Active drug allergy detected for '.implode(', ', $allConflicts).'. Provide explicit clinical override justification if medically required.'
+            );
+        }
+
+        return DB::transaction(function () use ($encounter, $patient, $resolvedRows, $prescriber, $allConflicts, $overrideReason, $clinicalNotes): Prescription {
+            $now = Carbon::now('UTC');
+            $allergyOverrideUsed = $allConflicts !== [];
+
+            $prescription = Prescription::query()->create([
+                'prescription_number' => $this->sequenceService->next('RX'),
+                'patient_id' => $patient->id,
+                'encounter_id' => $encounter->id,
+                'prescribed_by_user_id' => $prescriber->id,
+                'status' => Prescription::STATUS_ACTIVE,
+                'allergy_override_used' => $allergyOverrideUsed,
+                'allergy_override_reason' => $allergyOverrideUsed ? trim((string) $overrideReason) : null,
+                'clinical_notes' => $clinicalNotes,
+                'prescribed_at' => $now,
+                'version' => 1,
+            ]);
+
+            $medCodes = [];
+            foreach ($resolvedRows as $row) {
+                /** @var Medication $medication */
+                $medication = $row['medication'];
+                $data = $row['data'];
+                $medCodes[] = $medication->code;
+
+                PrescriptionItem::query()->create([
+                    'prescription_id' => $prescription->id,
+                    'medication_id' => $medication->id,
+                    'dose' => trim((string) ($data['dose'] ?? '1 tab')),
+                    'route' => (string) ($data['route'] ?? 'PO'),
+                    'frequency' => (string) ($data['frequency'] ?? 'OD'),
+                    'duration_days' => max(1, (int) ($data['duration_days'] ?? 14)),
+                    'quantity_prescribed' => max(1, (int) ($data['quantity_prescribed'] ?? 14)),
+                    'quantity_dispensed' => 0,
+                    'instructions' => isset($data['instructions']) && trim((string) $data['instructions']) !== ''
+                        ? trim((string) $data['instructions'])
+                        : null,
+                    'meal_timing' => isset($data['meal_timing']) && trim((string) $data['meal_timing']) !== ''
+                        ? trim((string) $data['meal_timing'])
+                        : null,
+                    'status' => PrescriptionItem::STATUS_PENDING,
+                ]);
+            }
+
+            $this->auditLogger->log(
+                action: $allergyOverrideUsed ? 'pharmacy.allergy_override_prescribed' : 'pharmacy.batch_prescribed',
+                actor: $prescriber,
+                subject: $prescription,
+                patientId: $patient->id,
+                newValues: [
+                    'prescription_number' => $prescription->prescription_number,
+                    'medication_codes' => $medCodes,
+                    'item_count' => count($medCodes),
                     'allergy_override_used' => $allergyOverrideUsed,
                 ],
                 reason: $overrideReason,

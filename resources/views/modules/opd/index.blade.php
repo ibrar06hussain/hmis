@@ -112,8 +112,11 @@
                                         @endcan
                                     @elseif(in_array($appt->status, ['in_consult', 'completed'], true) && $appt->encounter)
                                         @can('view', $appt->encounter)
+                                            <a href="{{ route('encounters.rapid.show', $appt->encounter) }}" class="btn btn-sm btn-warning fw-semibold" title="60-Second Rapid Cardiac Consult">
+                                                <i class="bi bi-lightning-charge-fill"></i> Rapid
+                                            </a>
                                             <a href="{{ route('encounters.show', $appt->encounter) }}" class="btn btn-sm btn-outline-primary">
-                                                Open Workspace
+                                                Chart
                                             </a>
                                         @endcan
                                     @endif
