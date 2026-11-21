@@ -8,10 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\AiAssistant\Services\AiGovernanceService;
 use App\Modules\Emr\Models\Encounter;
+use App\Modules\Emr\Services\ClinicianPreferenceService;
 use App\Modules\Emr\Services\RapidConsultService;
 use App\Modules\Lis\Models\LabTestCatalog;
 use App\Modules\Pharmacy\Exceptions\MedicationAllergyConflictException;
-use App\Modules\Pharmacy\Models\Medication;
 use App\Modules\Ris\Models\ImagingCatalog;
 use App\Modules\Terminology\Services\TerminologySearchService;
 use App\Support\OfflineQrSvg;
@@ -27,6 +27,7 @@ class RapidConsultController extends Controller
     public function __construct(
         private readonly RapidConsultService $rapidConsultService,
         private readonly TerminologySearchService $terminologySearch,
+        private readonly ClinicianPreferenceService $preferenceService,
     ) {}
 
     public function show(Request $request, Encounter $encounter): View
@@ -49,17 +50,31 @@ class RapidConsultController extends Controller
             'imagingStudies',
         ]);
 
+        $medications = $this->preferenceService->medicationsVisibleToUser($user);
+
         return view('modules.emr.rapid-consult', [
             'encounter' => $encounter,
             'patient' => $encounter->patient,
             'latestVital' => $encounter->vitalSigns->first(),
             'orderSets' => $this->rapidConsultService->resolvedOrderSetsForUser($user),
+            'clinicianChips' => $this->preferenceService->chipsForUser($user),
+            'favoriteMedications' => $this->preferenceService->favoriteMedicationsForUser($user),
             'copyForward' => $this->rapidConsultService->copyForwardSnapshot($encounter),
             'nextWaiting' => $this->rapidConsultService->nextWaitingAppointment($encounter),
-            'terminologyCodes' => $this->terminologySearch->search(null, null, 60),
+            'terminologyCodes' => $this->terminologySearch->search(null, null, 80),
             'labTests' => LabTestCatalog::query()->where('is_active', true)->orderBy('section')->orderBy('name')->get(),
             'imagingCatalog' => ImagingCatalog::query()->where('is_active', true)->orderBy('modality')->orderBy('name')->get(),
-            'medications' => Medication::query()->where('is_active', true)->orderBy('generic_name')->get(),
+            'medications' => $medications,
+            'medicationsJson' => $medications->map(fn ($m) => [
+                'id' => $m->id,
+                'generic_name' => $m->generic_name,
+                'brand_name' => $m->brand_name,
+                'strength' => $m->strength,
+                'drug_class' => $m->drug_class,
+                'is_hospital_formulary' => $m->is_hospital_formulary,
+                'label' => trim($m->generic_name.' '.$m->strength.($m->brand_name ? " ({$m->brand_name})" : '')),
+                'search_text' => strtolower(trim("{$m->generic_name} {$m->brand_name} {$m->strength} {$m->drug_class}")),
+            ])->values()->all(),
         ]);
     }
 

@@ -20,6 +20,8 @@ class Medication extends Model
         'reorder_level',
         'is_high_alert',
         'is_active',
+        'added_by_user_id',
+        'is_hospital_formulary',
         'version',
     ];
 
@@ -31,6 +33,7 @@ class Medication extends Model
             'reorder_level' => 'integer',
             'is_high_alert' => 'boolean',
             'is_active' => 'boolean',
+            'is_hospital_formulary' => 'boolean',
             'version' => 'integer',
         ];
     }

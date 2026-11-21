@@ -157,13 +157,16 @@
                     </select>
                 </div>
 
-                {{-- Symptom Quick Chips --}}
+                {{-- Symptom Quick Chips (Per-Doctor Customizable) --}}
                 <div class="mb-2">
-                    <label class="form-label small fw-semibold mb-1">Chief Complaint <span class="text-danger">*</span></label>
-                    <div class="d-flex flex-wrap gap-1 mb-1">
-                        @foreach(['Exertional chest pain', 'Shortness of breath', 'Palpitations', 'Orthopnea / PND', 'Pedal edema', 'Dizziness / Syncope', 'Routine cardiac follow-up (asymptomatic)'] as $sym)
-                            <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2 small chip-append" data-target="rapid_cc" data-text="{{ $sym }}">+ {{ $sym }}</button>
-                        @endforeach
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold mb-0">Chief Complaint <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small toggle-add-chip" data-box="add-chip-symptom">+ Add My Chip</button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1 mb-1" id="chips-symptom"></div>
+                    <div class="input-group input-group-sm mb-1 d-none" id="add-chip-symptom">
+                        <input type="text" class="form-control add-chip-input" data-category="symptom" placeholder="Add your own symptom chip (saved for your account)...">
+                        <button type="button" class="btn btn-primary btn-save-chip" data-category="symptom">Save</button>
                     </div>
                     <input type="text" id="rapid_cc" name="chief_complaint" value="{{ old('chief_complaint', $encounter->chief_complaint ?: 'Routine cardiac follow-up') }}" class="form-control form-control-sm" required>
                 </div>
@@ -192,29 +195,35 @@
                     </div>
                 </div>
 
-                {{-- 1-Tap Exam Presets + Exception Chips --}}
+                {{-- 1-Tap Exam Presets + Per-Doctor Exception Chips --}}
                 <div class="mb-2">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="form-label small fw-semibold mb-0">Cardiovascular &amp; Chest Exam</label>
-                        <button type="button" class="btn btn-xs btn-success py-0 px-2 small" id="btn-normal-cvs">
-                            <i class="bi bi-check2-all me-1"></i>1-Tap Normal CVS
-                        </button>
+                        <div class="d-flex gap-2 align-items-center">
+                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small toggle-add-chip" data-box="add-chip-exam">+ Add Exam Chip</button>
+                            <button type="button" class="btn btn-xs btn-success py-0 px-2 small" id="btn-normal-cvs">
+                                <i class="bi bi-check2-all me-1"></i>1-Tap Normal CVS
+                            </button>
+                        </div>
                     </div>
-                    <div class="d-flex flex-wrap gap-1 mb-1">
-                        @foreach(['Bilateral basal crepitations', 'Raised JVP', 'Bilateral pedal edema', 'Irregularly irregular pulse', 'Ejection systolic murmur', 'Pansystolic murmur'] as $ex)
-                            <button type="button" class="btn btn-xs btn-outline-warning text-dark py-0 px-2 small chip-append" data-target="rapid_exam" data-text="{{ $ex }}">+ {{ $ex }}</button>
-                        @endforeach
+                    <div class="d-flex flex-wrap gap-1 mb-1" id="chips-exam"></div>
+                    <div class="input-group input-group-sm mb-1 d-none" id="add-chip-exam">
+                        <input type="text" class="form-control add-chip-input" data-category="exam" placeholder="Add your own exam finding chip...">
+                        <button type="button" class="btn btn-primary btn-save-chip" data-category="exam">Save</button>
                     </div>
                     <textarea id="rapid_exam" name="physical_examination" rows="2" class="form-control form-control-sm macro-enabled" placeholder="Type .cvs or tap Normal CVS above...">{{ old('physical_examination') }}</textarea>
                 </div>
 
-                {{-- ECG Quick Pills --}}
+                {{-- ECG Quick Pills (Per-Doctor Customizable) --}}
                 <div class="mb-2">
-                    <label class="form-label small fw-semibold mb-1">ECG / Echo Summary</label>
-                    <div class="d-flex flex-wrap gap-1 mb-1">
-                        @foreach(['NSR, no acute ST-T changes', 'LVH by voltage criteria', 'Atrial Fibrillation', 'Old Anterior MI (Q waves V1-V4)', 'ST depression lateral leads'] as $ecg)
-                            <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2 small chip-append" data-target="rapid_ecg" data-text="{{ $ecg }}">+ {{ $ecg }}</button>
-                        @endforeach
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold mb-0">ECG / Echo Summary</label>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small toggle-add-chip" data-box="add-chip-ecg">+ Add ECG Chip</button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1 mb-1" id="chips-ecg"></div>
+                    <div class="input-group input-group-sm mb-1 d-none" id="add-chip-ecg">
+                        <input type="text" class="form-control add-chip-input" data-category="ecg" placeholder="Add your own ECG/Echo chip...">
+                        <button type="button" class="btn btn-primary btn-save-chip" data-category="ecg">Save</button>
                     </div>
                     <input type="text" id="rapid_ecg" name="ecg_summary" value="{{ old('ecg_summary') }}" class="form-control form-control-sm">
                 </div>
@@ -242,17 +251,42 @@
                 </div>
             </div>
 
-            {{-- Coded ICD-10 / ICD-11 Diagnosis Multi-Select --}}
+            {{-- Diagnosis Shortcuts + Live Offline ICD-10 / ICD-11 Search --}}
             <div class="hmis-card p-3">
-                <h2 class="h6 fw-bold border-bottom pb-2 mb-2"><i class="bi bi-tags-fill text-primary me-1"></i>Coded ICD-10 / ICD-11 Diagnoses (Check One or More)</h2>
-                <div class="row g-1" style="max-height: 150px; overflow-y: auto;">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                    <h2 class="h6 fw-bold mb-0"><i class="bi bi-tags-fill text-primary me-1"></i>Diagnosis Shortcuts &amp; ICD-10 / ICD-11</h2>
+                    <small class="text-muted">Click shortcut to toggle &middot; &starf; pins your own</small>
+                </div>
+
+                {{-- 1-Click Personal Diagnosis Shortcuts --}}
+                <div class="d-flex flex-wrap gap-1 mb-2" id="chips-diagnosis_shortcut"></div>
+
+                {{-- Instant Offline Diagnosis Filter --}}
+                <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="search" id="dx-filter-input" class="form-control" placeholder="Filter ICD-10 / ICD-11 by code, name or alias (e.g. stemi, htn, afib, I50)...">
+                </div>
+
+                <div class="row g-1" id="dx-checkbox-list" style="max-height: 155px; overflow-y: auto;">
                     @foreach($terminologyCodes as $tc)
-                        <div class="col-md-6">
-                            <div class="form-check small">
-                                <input class="form-check-input rapid-dx-check" type="checkbox" name="diagnosis_ids[]" value="{{ $tc->id }}" id="dx_{{ $tc->id }}">
-                                <label class="form-check-label" for="dx_{{ $tc->id }}">
-                                    <span class="badge bg-dark font-monospace">{{ $tc->code }}</span> {{ \Illuminate\Support\Str::limit($tc->display_name, 34) }}
-                                </label>
+                        @php
+                            $dxSearchBlob = strtolower(trim($tc->code.' '.$tc->display_name.' '.implode(' ', (array) ($tc->aliases ?? []))));
+                        @endphp
+                        <div class="col-md-6 dx-list-item" data-search="{{ $dxSearchBlob }}">
+                            <div class="d-flex align-items-center justify-content-between gap-1 small">
+                                <div class="form-check mb-0 text-truncate">
+                                    <input class="form-check-input rapid-dx-check" type="checkbox" name="diagnosis_ids[]" value="{{ $tc->id }}" id="dx_{{ $tc->id }}">
+                                    <label class="form-check-label" for="dx_{{ $tc->id }}" title="{{ $tc->display_name }}">
+                                        <span class="badge bg-dark font-monospace">{{ $tc->code }}</span> {{ \Illuminate\Support\Str::limit($tc->display_name, 28) }}
+                                    </label>
+                                </div>
+                                <button type="button"
+                                        class="btn btn-link btn-sm p-0 text-warning text-decoration-none btn-pin-dx"
+                                        data-term-id="{{ $tc->id }}"
+                                        data-label="{{ $tc->code }} — {{ \Illuminate\Support\Str::limit($tc->display_name, 22) }}"
+                                        title="Pin to my Diagnosis Shortcuts">
+                                    <i class="bi bi-star"></i>
+                                </button>
                             </div>
                         </div>
                     @endforeach
@@ -260,15 +294,73 @@
             </div>
         </div>
 
-        {{-- Right Column (6 cols): Multi-Drug Prescription Builder + Investigations + Atomic Save --}}
+        {{-- Right Column (6 cols): Multi-Drug Prescription Builder + Medicine Filter + Custom Medicines --}}
         <div class="col-lg-6">
             {{-- Multi-Drug Prescription Builder --}}
             <div class="hmis-card p-3 mb-3">
-                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom pb-2 mb-2">
                     <h2 class="h6 fw-bold mb-0"><i class="bi bi-capsule-pill text-primary me-1"></i>Multi-Drug Prescription (Single Consolidated Rx)</h2>
-                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="btn-add-med-row">
-                        <i class="bi bi-plus-lg"></i> Add Medicine
-                    </button>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-bs-toggle="collapse" data-bs-target="#customMedBox">
+                            <i class="bi bi-plus-circle me-1"></i>Add My Medicine
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="btn-add-med-row">
+                            <i class="bi bi-plus-lg"></i> Empty Row
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Doctor's 1-Tap Quick Favorite Medicines --}}
+                <div class="mb-2">
+                    <div class="small fw-semibold text-muted mb-1">My Quick Medicines (1-Tap to Prescribe):</div>
+                    <div class="d-flex flex-wrap gap-1" id="favorite-meds-bar"></div>
+                </div>
+
+                {{-- Instant Offline Medicine Search / Filter --}}
+                <div class="mb-2">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="search" id="med-filter-input" class="form-control" placeholder="Filter any medicine by generic, brand, strength, or class (e.g. loprin, concor, statin)...">
+                    </div>
+                    <div id="med-filter-results" class="border rounded bg-light p-2 mt-1 d-none" style="max-height: 150px; overflow-y: auto;"></div>
+                </div>
+
+                {{-- Inline Add Doctor's Own Custom Medicine Panel --}}
+                <div class="collapse mb-2" id="customMedBox">
+                    <div class="p-2 border border-success rounded bg-success bg-opacity-10 small">
+                        <div class="fw-bold text-success mb-2"><i class="bi bi-capsule me-1"></i>Add Your Own Medicine (Saved for Your Account &amp; Pinned)</div>
+                        <div class="row g-1 mb-1">
+                            <div class="col-md-4"><input type="text" id="cm_generic" class="form-control form-control-sm" placeholder="Generic name * (e.g. Rosuvastatin)"></div>
+                            <div class="col-md-4"><input type="text" id="cm_brand" class="form-control form-control-sm" placeholder="Brand (e.g. Rovista)"></div>
+                            <div class="col-md-4"><input type="text" id="cm_strength" class="form-control form-control-sm" placeholder="Strength * (e.g. 20 mg)"></div>
+                        </div>
+                        <div class="row g-1 mb-2">
+                            <div class="col-md-3">
+                                <select id="cm_form" class="form-select form-select-sm">
+                                    <option value="tablet">Tablet</option>
+                                    <option value="capsule">Capsule</option>
+                                    <option value="syrup">Syrup</option>
+                                    <option value="sublingual">Sublingual</option>
+                                    <option value="injection">Injection</option>
+                                    <option value="sachet">Sachet</option>
+                                    <option value="inhaler">Inhaler</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3"><input type="text" id="cm_class" class="form-control form-control-sm" placeholder="Class (e.g. Statin)"></div>
+                            <div class="col-md-2">
+                                <select id="cm_freq" class="form-select form-select-sm">
+                                    <option value="OD">OD</option>
+                                    <option value="BD">BD</option>
+                                    <option value="TDS">TDS</option>
+                                    <option value="HS">HS</option>
+                                    <option value="PRN">PRN</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2"><input type="number" id="cm_days" value="30" min="1" class="form-control form-control-sm" placeholder="Days"></div>
+                            <div class="col-md-2 d-grid"><button type="button" id="btn-save-custom-med" class="btn btn-sm btn-success fw-semibold">Save &amp; Add</button></div>
+                        </div>
+                        <div id="cm_feedback" class="small d-none"></div>
+                    </div>
                 </div>
 
                 @if(session('allergy_conflict'))
@@ -298,7 +390,7 @@
                         <tbody id="rapid-rx-tbody"></tbody>
                     </table>
                 </div>
-                <div class="text-muted small mt-2" id="rapid-rx-empty">Tap any Cardiology Protocol above or click <strong>+ Add Medicine</strong> to build a multi-drug prescription.</div>
+                <div class="text-muted small mt-2" id="rapid-rx-empty">Tap any Protocol, pick from <strong>My Quick Medicines</strong>, or type above to filter any medicine.</div>
             </div>
 
             {{-- Rapid Lab & Diagnostic Imaging Orders --}}
@@ -390,7 +482,18 @@
 (function () {
     const orderSets = @json($orderSets);
     const copyForward = @json($copyForward);
-    const medications = @json($medications->map(fn ($m) => ['id' => $m->id, 'label' => "{$m->generic_name} {$m->strength} ({$m->brand_name})"])->values());
+    let clinicianChips = @json($clinicianChips);
+    let favoriteMeds = @json($favoriteMedications);
+    const medications = @json($medicationsJson);
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const prefEndpoints = {
+        storeChip: @json(route('emr.preferences.chips.store')),
+        destroyChip: @json(route('emr.preferences.chips.destroy')),
+        storeMed: @json(route('emr.preferences.medications.store')),
+        pinMed: @json(route('emr.preferences.medications.pin')),
+        unpinMedBase: @json(url('/emr/preferences/medications')),
+    };
 
     const macros = {
         '.cvs': 'S1+S2 audible, no murmur, JVP not raised, chest clear bilaterally, no pedal edema.',
@@ -472,14 +575,278 @@
         document.getElementById('rapid_exam').value = macros['.cvs'];
     });
 
-    document.querySelectorAll('.chip-append').forEach(btn => {
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    function appendChipText(targetId, text) {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        const current = target.value.trim();
+        target.value = current ? `${current}; ${text}` : text;
+    }
+
+    async function apiJson(url, method, body = null) {
+        const resp = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: body ? JSON.stringify(body) : null
+        });
+        return { ok: resp.ok, data: await resp.json() };
+    }
+
+    // 1. Render Per-Doctor Editable Assessment Chips (Symptoms, Exam, ECG)
+    const chipConfig = {
+        symptom: { container: 'chips-symptom', target: 'rapid_cc', btnClass: 'btn-outline-secondary' },
+        exam: { container: 'chips-exam', target: 'rapid_exam', btnClass: 'btn-outline-warning text-dark' },
+        ecg: { container: 'chips-ecg', target: 'rapid_ecg', btnClass: 'btn-outline-secondary' },
+    };
+
+    function renderAllChips() {
+        for (const [category, cfg] of Object.entries(chipConfig)) {
+            const box = document.getElementById(cfg.container);
+            if (!box) continue;
+            box.innerHTML = '';
+            (clinicianChips[category] || []).forEach(chip => {
+                const grp = document.createElement('div');
+                grp.className = 'btn-group btn-group-sm';
+                grp.innerHTML = `
+                    <button type="button" class="btn btn-xs ${cfg.btnClass} py-0 px-2 small">${chip.is_custom ? '&#9733; ' : '+ '}${escapeHtml(chip.label)}</button>
+                    <button type="button" class="btn btn-xs ${cfg.btnClass} py-0 px-1 small" title="Remove chip from my list">&times;</button>
+                `;
+                grp.children[0].addEventListener('click', () => appendChipText(cfg.target, chip.value));
+                grp.children[1].addEventListener('click', async () => {
+                    const res = await apiJson(prefEndpoints.destroyChip, 'DELETE', { category, label: chip.label });
+                    if (res.ok && res.data.chips) {
+                        clinicianChips = res.data.chips;
+                        renderAllChips();
+                    }
+                });
+                box.appendChild(grp);
+            });
+        }
+
+        // Render 1-Click Personal Diagnosis Shortcuts
+        const dxBox = document.getElementById('chips-diagnosis_shortcut');
+        if (dxBox) {
+            dxBox.innerHTML = '';
+            (clinicianChips.diagnosis_shortcut || []).forEach(dx => {
+                const cb = document.getElementById('dx_' + dx.terminology_code_id);
+                const isChecked = cb ? cb.checked : false;
+                const grp = document.createElement('div');
+                grp.className = 'btn-group btn-group-sm';
+                const activeCls = isChecked ? 'btn-primary' : 'btn-outline-primary';
+                grp.innerHTML = `
+                    <button type="button" class="btn btn-xs ${activeCls} py-0 px-2 small fw-semibold">${escapeHtml(dx.label)}</button>
+                    <button type="button" class="btn btn-xs ${activeCls} py-0 px-1 small" title="Remove diagnosis shortcut">&times;</button>
+                `;
+                grp.children[0].addEventListener('click', () => {
+                    if (cb) {
+                        cb.checked = !cb.checked;
+                        renderAllChips();
+                    }
+                });
+                grp.children[1].addEventListener('click', async () => {
+                    const res = await apiJson(prefEndpoints.destroyChip, 'DELETE', {
+                        category: 'diagnosis_shortcut',
+                        label: dx.label,
+                        terminology_code_id: dx.terminology_code_id
+                    });
+                    if (res.ok && res.data.chips) {
+                        clinicianChips = res.data.chips;
+                        renderAllChips();
+                    }
+                });
+                dxBox.appendChild(grp);
+            });
+        }
+    }
+
+    document.querySelectorAll('.toggle-add-chip').forEach(btn => {
         btn.addEventListener('click', () => {
-            const target = document.getElementById(btn.dataset.target);
-            if (!target) return;
-            const current = target.value.trim();
-            target.value = current ? `${current}; ${btn.dataset.text}` : btn.dataset.text;
+            const box = document.getElementById(btn.dataset.box);
+            if (!box) return;
+            box.classList.toggle('d-none');
+            const inp = box.querySelector('input');
+            if (inp && !box.classList.contains('d-none')) inp.focus();
         });
     });
+
+    async function saveNewChip(category) {
+        const input = document.querySelector(`.add-chip-input[data-category="${category}"]`);
+        if (!input) return;
+        const label = input.value.trim();
+        if (!label) return;
+        const res = await apiJson(prefEndpoints.storeChip, 'POST', { category, label, value: label });
+        if (res.ok && res.data.chips) {
+            clinicianChips = res.data.chips;
+            input.value = '';
+            renderAllChips();
+        }
+    }
+
+    document.querySelectorAll('.btn-save-chip').forEach(btn => {
+        btn.addEventListener('click', () => saveNewChip(btn.dataset.category));
+    });
+    document.querySelectorAll('.add-chip-input').forEach(inp => {
+        inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveNewChip(inp.dataset.category);
+            }
+        });
+    });
+
+    // 2. Live Offline Diagnosis Filter + Pin Diagnosis Shortcut
+    const dxFilter = document.getElementById('dx-filter-input');
+    if (dxFilter) {
+        dxFilter.addEventListener('input', () => {
+            const q = dxFilter.value.trim().toLowerCase();
+            document.querySelectorAll('.dx-list-item').forEach(row => {
+                row.style.display = (!q || (row.dataset.search || '').includes(q)) ? '' : 'none';
+            });
+        });
+    }
+    document.querySelectorAll('.rapid-dx-check').forEach(cb => cb.addEventListener('change', renderAllChips));
+    document.querySelectorAll('.btn-pin-dx').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const res = await apiJson(prefEndpoints.storeChip, 'POST', {
+                category: 'diagnosis_shortcut',
+                terminology_code_id: Number(btn.dataset.termId),
+                label: btn.dataset.label
+            });
+            if (res.ok && res.data.chips) {
+                clinicianChips = res.data.chips;
+                renderAllChips();
+            }
+        });
+    });
+
+    // 3. Per-Doctor Favorite Quick Medicines Bar + Instant Medicine Filter + Add Own Medicine
+    function renderFavoriteMeds() {
+        const bar = document.getElementById('favorite-meds-bar');
+        if (!bar) return;
+        bar.innerHTML = '';
+        if (!favoriteMeds.length) {
+            bar.innerHTML = '<span class="small text-muted">Star (&starf;) any medicine below or click <strong>+ Add My Medicine</strong> to pin 1-tap favorites.</span>';
+            return;
+        }
+        favoriteMeds.forEach(fav => {
+            const grp = document.createElement('div');
+            grp.className = 'btn-group btn-group-sm';
+            grp.innerHTML = `
+                <button type="button" class="btn btn-xs btn-outline-success py-0 px-2 small fw-semibold">+ ${escapeHtml(fav.label)} (${escapeHtml(fav.frequency)})</button>
+                <button type="button" class="btn btn-xs btn-outline-success py-0 px-1 small" title="Unpin from my favorites">&times;</button>
+            `;
+            grp.children[0].addEventListener('click', () => addMedicationRow(fav));
+            grp.children[1].addEventListener('click', async () => {
+                const res = await apiJson(`${prefEndpoints.unpinMedBase}/${fav.medication_id}/pin`, 'DELETE');
+                if (res.ok && res.data.favorites) {
+                    favoriteMeds = res.data.favorites;
+                    renderFavoriteMeds();
+                }
+            });
+            bar.appendChild(grp);
+        });
+    }
+
+    const medFilterInput = document.getElementById('med-filter-input');
+    const medFilterResults = document.getElementById('med-filter-results');
+    function renderMedFilterResults() {
+        if (!medFilterInput || !medFilterResults) return;
+        const q = medFilterInput.value.trim().toLowerCase();
+        if (!q) {
+            medFilterResults.classList.add('d-none');
+            medFilterResults.innerHTML = '';
+            return;
+        }
+        const matches = medications.filter(m => m.search_text.includes(q)).slice(0, 12);
+        medFilterResults.classList.remove('d-none');
+        if (!matches.length) {
+            medFilterResults.innerHTML = `<div class="small text-muted">No medicine matching "<strong>${escapeHtml(q)}</strong>". Click <strong>+ Add My Medicine</strong> above to add it now.</div>`;
+            return;
+        }
+        medFilterResults.innerHTML = '';
+        matches.forEach(m => {
+            const row = document.createElement('div');
+            row.className = 'd-flex justify-content-between align-items-center py-1 border-bottom small';
+            row.innerHTML = `
+                <div>
+                    <strong>${escapeHtml(m.label)}</strong>
+                    <span class="text-muted ms-1">${escapeHtml(m.drug_class || '')}</span>
+                    ${m.is_hospital_formulary ? '' : '<span class="badge bg-success-subtle text-success ms-1">My Med</span>'}
+                </div>
+                <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-xs btn-primary py-0 px-2 small">+ Rx</button>
+                    <button type="button" class="btn btn-xs btn-outline-warning text-dark py-0 px-2 small" title="Pin to My Quick Medicines">&#9733;</button>
+                </div>
+            `;
+            row.querySelector('.btn-primary').addEventListener('click', () => {
+                addMedicationRow({ medication_id: m.id, dose: '1 tab', frequency: 'OD', duration_days: 14, meal_timing: 'after_meal' });
+                medFilterInput.value = '';
+                renderMedFilterResults();
+            });
+            row.querySelector('.btn-outline-warning').addEventListener('click', async () => {
+                const res = await apiJson(prefEndpoints.pinMed, 'POST', { medication_id: m.id });
+                if (res.ok && res.data.favorites) {
+                    favoriteMeds = res.data.favorites;
+                    renderFavoriteMeds();
+                }
+            });
+            medFilterResults.appendChild(row);
+        });
+    }
+    if (medFilterInput) medFilterInput.addEventListener('input', renderMedFilterResults);
+
+    const saveCustomMedBtn = document.getElementById('btn-save-custom-med');
+    if (saveCustomMedBtn) {
+        saveCustomMedBtn.addEventListener('click', async () => {
+            const fb = document.getElementById('cm_feedback');
+            const payload = {
+                generic_name: document.getElementById('cm_generic').value.trim(),
+                brand_name: document.getElementById('cm_brand').value.trim(),
+                strength: document.getElementById('cm_strength').value.trim(),
+                dosage_form: document.getElementById('cm_form').value,
+                drug_class: document.getElementById('cm_class').value.trim(),
+                default_frequency: document.getElementById('cm_freq').value,
+                default_duration_days: Number(document.getElementById('cm_days').value || 30),
+            };
+            if (!payload.generic_name || !payload.strength) {
+                fb.className = 'small text-danger';
+                fb.textContent = 'Generic name and strength are required.';
+                return;
+            }
+            const res = await apiJson(prefEndpoints.storeMed, 'POST', payload);
+            if (!res.ok || !res.data.medication) {
+                fb.className = 'small text-danger';
+                fb.textContent = res.data.message || 'Could not save medicine.';
+                return;
+            }
+            medications.unshift(res.data.medication);
+            favoriteMeds = res.data.favorites || favoriteMeds;
+            renderFavoriteMeds();
+            addMedicationRow({
+                medication_id: res.data.medication.id,
+                dose: '1 tab',
+                frequency: payload.default_frequency,
+                duration_days: payload.default_duration_days,
+                meal_timing: 'after_meal',
+            });
+            document.getElementById('cm_generic').value = '';
+            document.getElementById('cm_brand').value = '';
+            document.getElementById('cm_strength').value = '';
+            document.getElementById('cm_class').value = '';
+            fb.className = 'small text-success fw-semibold';
+            fb.textContent = `Saved "${res.data.medication.label}" to your personal quick medicines & added to Rx!`;
+        });
+    }
+
+    renderAllChips();
+    renderFavoriteMeds();
 
     // Apply 1-Click Cardiology Protocol Bundle
     document.querySelectorAll('.rapid-bundle-btn').forEach(btn => {
@@ -499,6 +866,7 @@
             if (set.default_follow_up) document.getElementById('rapid_followup').value = set.default_follow_up;
 
             document.querySelectorAll('.rapid-dx-check').forEach(cb => cb.checked = (set.diagnosis_ids || []).includes(Number(cb.value)));
+            renderAllChips();
             document.querySelectorAll('.rapid-lab-check').forEach(cb => cb.checked = (set.lab_test_ids || []).includes(Number(cb.value)));
             document.querySelectorAll('.rapid-img-check').forEach(cb => cb.checked = (set.imaging_catalog_ids || []).includes(Number(cb.value)));
 
@@ -521,6 +889,7 @@
             if (copyForward.treatment_plan) document.getElementById('rapid_plan').value = copyForward.treatment_plan;
             if (copyForward.follow_up_instructions) document.getElementById('rapid_followup').value = copyForward.follow_up_instructions;
             document.querySelectorAll('.rapid-dx-check').forEach(cb => cb.checked = (copyForward.diagnosis_ids || []).includes(Number(cb.value)));
+            renderAllChips();
 
             tbody.innerHTML = '';
             (copyForward.medications || []).forEach(m => addMedicationRow(m));

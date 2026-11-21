@@ -15,11 +15,11 @@ use App\Modules\Emr\Models\ClinicalNote;
 use App\Modules\Emr\Models\Encounter;
 use App\Modules\Emr\Services\AllergyService;
 use App\Modules\Emr\Services\ClinicalNoteService;
+use App\Modules\Emr\Services\ClinicianPreferenceService;
 use App\Modules\Emr\Services\EncounterDiagnosisService;
 use App\Modules\Emr\Services\VitalSignService;
 use App\Modules\Lis\Models\LabTestCatalog;
 use App\Modules\Patient\Models\Patient;
-use App\Modules\Pharmacy\Models\Medication;
 use App\Modules\Ris\Models\ImagingCatalog;
 use App\Modules\Terminology\Services\TerminologySearchService;
 use Illuminate\Http\RedirectResponse;
@@ -39,9 +39,12 @@ class EncounterWorkspaceController extends Controller
         private readonly AppointmentService $appointmentService,
     ) {}
 
-    public function show(Encounter $encounter): View
+    public function show(Request $request, Encounter $encounter): View
     {
         Gate::authorize('view', $encounter);
+
+        /** @var User $user */
+        $user = $request->user();
 
         $encounter->load([
             'patient.activeAllergies',
@@ -63,7 +66,7 @@ class EncounterWorkspaceController extends Controller
             'terminologyCodes' => $this->terminologySearch->search(null, null, 50),
             'labTests' => LabTestCatalog::query()->where('is_active', true)->orderBy('section')->orderBy('name')->get(),
             'imagingCatalog' => ImagingCatalog::query()->where('is_active', true)->orderBy('modality')->orderBy('name')->get(),
-            'medications' => Medication::query()->where('is_active', true)->orderBy('generic_name')->get(),
+            'medications' => app(ClinicianPreferenceService::class)->medicationsVisibleToUser($user),
         ]);
     }
 

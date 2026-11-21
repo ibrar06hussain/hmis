@@ -8,6 +8,7 @@ use App\Modules\Billing\Http\Controllers\BillingDeskController;
 use App\Modules\Cardiology\Http\Controllers\CardiacProcedureController;
 use App\Modules\Core\Http\Controllers\LocaleController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
+use App\Modules\Emr\Http\Controllers\ClinicianPreferenceController;
 use App\Modules\Emr\Http\Controllers\CoSignTrayController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
 use App\Modules\Emr\Http\Controllers\OrderSetController;
@@ -169,6 +170,14 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/favorites', [OrderSetController::class, 'index'])->name('favorites.index');
         Route::post('/favorites', [OrderSetController::class, 'store'])->name('favorites.store');
         Route::delete('/favorites/{orderSet}', [OrderSetController::class, 'destroy'])->name('favorites.destroy');
+
+        Route::prefix('preferences')->name('preferences.')->group(function (): void {
+            Route::post('/chips', [ClinicianPreferenceController::class, 'storeChip'])->name('chips.store');
+            Route::delete('/chips', [ClinicianPreferenceController::class, 'destroyChip'])->name('chips.destroy');
+            Route::post('/medications', [ClinicianPreferenceController::class, 'storeMedication'])->name('medications.store');
+            Route::post('/medications/pin', [ClinicianPreferenceController::class, 'pinMedication'])->name('medications.pin');
+            Route::delete('/medications/{medication}/pin', [ClinicianPreferenceController::class, 'unpinMedication'])->name('medications.unpin');
+        });
     });
 
     Route::prefix('encounters')->name('encounters.')->group(function (): void {

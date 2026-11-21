@@ -3,6 +3,13 @@
 
 All notable milestones are documented chronologically.
 
+### [0.9.1] — 2026-11-22 (Per-Doctor Custom Tap Chips, Diagnosis Shortcuts, Instant Medicine Filter & Custom Doctor Medicines)
+- Added per-doctor persistence tables (`clinician_quick_chips`, `clinician_favorite_medications`, and `medications.added_by_user_id` / `is_hospital_formulary`) via `2026_11_22_090001_create_clinician_preferences_tables.php`.
+- Added zero-reload inline personalization inside **Rapid 60s Consult** (`/encounters/{id}/rapid`) remembered individually for every doctor:
+  - **Custom Assessment Tap Chips:** Add custom chips or remove (`×`) any default/custom chip across Symptoms, Exam Findings, and ECG Summaries (`POST/DELETE /emr/preferences/chips`).
+  - **1-Click Diagnosis Shortcuts & Live Offline ICD-10/ICD-11 Filter:** Pin (`★`) or remove (`×`) personal ICD diagnosis shortcuts and filter all offline codes by code, name, or alias.
+  - **Instant Medicine Filter, 1-Tap Quick Medicines & Add My Medicine:** Real-time offline search across generic, brand, strength, and drug class; star (`★`) any formulary medicine to pin it; or add custom/outside-formulary medicines scoped to the prescribing doctor (`POST /emr/preferences/medications`) with full active drug allergy checking and Bilingual Urdu/English Rx printing.
+
 ### [0.9.0] — 2026-11-22 (High-Velocity 60-Second Cardiac OPD Productivity Suite — Phases 1, 2 & 3)
 - **Phase 1 — Rapid 60-Second Consult Mode & Bilingual Visual Rx:**
   - Added single-screen atomic consultation workspace (`/encounters/{encounter}/rapid`) consolidating vitals, structured cardiology note (draft or immediately signed), coded ICD-10/ICD-11 diagnoses, multi-drug consolidated `Prescription` (`PharmacyService::prescribeBatch` with full active drug allergy rollback/override guard), lab panels, imaging orders, and encounter completion into a single DB transaction.
