@@ -8,7 +8,9 @@ use App\Modules\Billing\Http\Controllers\BillingDeskController;
 use App\Modules\Cardiology\Http\Controllers\CardiacProcedureController;
 use App\Modules\Core\Http\Controllers\LocaleController;
 use App\Modules\Emergency\Http\Controllers\EmergencyController;
+use App\Modules\Emr\Http\Controllers\CoSignTrayController;
 use App\Modules\Emr\Http\Controllers\EncounterWorkspaceController;
+use App\Modules\Emr\Http\Controllers\OrderSetController;
 use App\Modules\Emr\Http\Controllers\RapidConsultController;
 use App\Modules\Hr\Http\Controllers\DutyRosterController;
 use App\Modules\Iam\Http\Controllers\AuthController;
@@ -19,6 +21,7 @@ use App\Modules\Ipd\Http\Controllers\IpdController;
 use App\Modules\Lis\Http\Controllers\LisWorkbenchController;
 use App\Modules\Nursing\Http\Controllers\NursingStationController;
 use App\Modules\Opd\Http\Controllers\OpdQueueController;
+use App\Modules\Opd\Http\Controllers\PreConsultController;
 use App\Modules\Patient\Http\Controllers\PatientController;
 use App\Modules\Pharmacy\Http\Controllers\PharmacyWorkbenchController;
 use App\Modules\Reporting\Http\Controllers\ExecutiveReportController;
@@ -71,6 +74,8 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('opd')->name('opd.')->group(function (): void {
         Route::get('/', [OpdQueueController::class, 'index'])->name('index');
+        Route::get('/pre-consult', [PreConsultController::class, 'index'])->name('pre-consult.index');
+        Route::post('/pre-consult/{encounter}', [PreConsultController::class, 'store'])->name('pre-consult.store');
         Route::post('/appointments', [OpdQueueController::class, 'store'])->name('appointments.store');
         Route::get('/appointments/{appointment}/slip', [OpdQueueController::class, 'visitSlip'])->name('appointments.slip');
         Route::post('/appointments/{appointment}/check-in', [OpdQueueController::class, 'checkIn'])->name('appointments.check-in');
@@ -156,6 +161,14 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('ai-governance')->name('ai.')->group(function (): void {
         Route::get('/', [AiGovernanceController::class, 'index'])->name('index');
         Route::post('/draft', [AiGovernanceController::class, 'invokeDraft'])->name('draft');
+    });
+
+    Route::prefix('emr')->name('emr.')->group(function (): void {
+        Route::get('/cosign', [CoSignTrayController::class, 'index'])->name('cosign.index');
+        Route::post('/cosign/{note}/approve', [CoSignTrayController::class, 'approve'])->name('cosign.approve');
+        Route::get('/favorites', [OrderSetController::class, 'index'])->name('favorites.index');
+        Route::post('/favorites', [OrderSetController::class, 'store'])->name('favorites.store');
+        Route::delete('/favorites/{orderSet}', [OrderSetController::class, 'destroy'])->name('favorites.destroy');
     });
 
     Route::prefix('encounters')->name('encounters.')->group(function (): void {

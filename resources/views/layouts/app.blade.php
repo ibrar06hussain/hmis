@@ -51,8 +51,26 @@
             @endcan
 
             @can('viewAny', \App\Modules\Appointments\Models\Appointment::class)
-                <a href="{{ route('opd.index') }}" class="nav-link {{ request()->routeIs('opd.*', 'encounters.*') ? 'active' : '' }}">
+                <a href="{{ route('opd.index') }}" class="nav-link {{ request()->routeIs('opd.index', 'encounters.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar2-check-fill"></i> {{ __('hmis.nav.opd') }}
+                </a>
+            @endcan
+
+            @can('emr.vitals.record')
+                <a href="{{ route('opd.pre-consult.index') }}" class="nav-link {{ request()->routeIs('opd.pre-consult.*') ? 'active' : '' }}">
+                    <i class="bi bi-heart-pulse text-warning"></i> {{ __('hmis.nav.pre_consult') }}
+                </a>
+            @endcan
+
+            @can('emr.note.sign')
+                <a href="{{ route('emr.cosign.index') }}" class="nav-link {{ request()->routeIs('emr.cosign.*') ? 'active' : '' }}">
+                    <i class="bi bi-pen-fill text-info"></i> {{ __('hmis.nav.cosign_tray') }}
+                </a>
+            @endcan
+
+            @can('emr.note.create')
+                <a href="{{ route('emr.favorites.index') }}" class="nav-link {{ request()->routeIs('emr.favorites.*') ? 'active' : '' }}">
+                    <i class="bi bi-bookmark-star-fill text-success"></i> {{ __('hmis.nav.order_sets') }}
                 </a>
             @endcan
 
