@@ -11,6 +11,7 @@ use App\Modules\Lis\Models\LabOrder;
 use App\Modules\Lis\Models\LabOrderItem;
 use App\Modules\Lis\Models\LabTestCatalog;
 use App\Modules\Lis\Models\Specimen;
+use App\Modules\Patient\Models\Patient;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -33,23 +34,48 @@ final class LabOrderService
         ?string $clinicalNotes,
         User $actor,
     ): LabOrder {
+        return $this->createOrderForPatient(
+            patient: $encounter->patient,
+            testIds: $testIds,
+            priority: $priority,
+            clinicalNotes: $clinicalNotes,
+            actor: $actor,
+            encounter: $encounter,
+        );
+    }
+
+    /**
+     * Create a laboratory order directly for a patient (from Encounter OR LIS Direct Booking Desk)
+     * and automatically generate unique barcode specimens grouped by specimen type.
+     *
+     * @param  list<int>  $testIds
+     */
+    public function createOrderForPatient(
+        Patient $patient,
+        array $testIds,
+        string $priority,
+        ?string $clinicalNotes,
+        User $actor,
+        ?Encounter $encounter = null,
+    ): LabOrder {
         $tests = LabTestCatalog::query()
             ->whereIn('id', $testIds)
             ->where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('id')
             ->get();
 
         if ($tests->isEmpty()) {
             throw new \InvalidArgumentException('Select at least one active laboratory test.');
         }
 
-        return DB::transaction(function () use ($encounter, $tests, $priority, $clinicalNotes, $actor): LabOrder {
+        return DB::transaction(function () use ($patient, $encounter, $tests, $priority, $clinicalNotes, $actor): LabOrder {
             $now = Carbon::now('UTC');
-            $patient = $encounter->patient;
 
             $order = LabOrder::query()->create([
                 'order_number' => $this->sequenceService->next('LAB'),
                 'patient_id' => $patient->id,
-                'encounter_id' => $encounter->id,
+                'encounter_id' => $encounter?->id,
                 'ordered_by_user_id' => $actor->id,
                 'priority' => $priority,
                 'status' => LabOrder::STATUS_ORDERED,
@@ -165,9 +191,18 @@ final class LabOrderService
         });
     }
 
-    /**
-     * Reject a compromised specimen (e.g., hemolyzed/clotted) and automatically issue a new barcode for recollection.
-     */
+    public function receiveSpecimenByBarcode(string $barcode, User $actor): Specimen
+    {
+        $clean = strtoupper(trim($barcode));
+        $specimen = Specimen::query()->where('barcode', $clean)->first();
+
+        if ($specimen === null) {
+            throw new \DomainException("No laboratory specimen found with barcode '{$clean}'.");
+        }
+
+        return $this->receiveSpecimen($specimen, $actor);
+    }
+
     public function rejectAndReissueSpecimen(Specimen $specimen, string $reason, User $actor): Specimen
     {
         return DB::transaction(function () use ($specimen, $reason, $actor): Specimen {
@@ -218,22 +253,25 @@ final class LabOrderService
         ?User $actor,
         string $source = 'manual',
         ?string $analyzerDeviceCode = null,
+        ?string $remarks = null,
     ): LabOrderItem {
-        return DB::transaction(function () use ($item, $numericValue, $textValue, $actor, $source, $analyzerDeviceCode): LabOrderItem {
+        return DB::transaction(function () use ($item, $numericValue, $textValue, $actor, $source, $analyzerDeviceCode, $remarks): LabOrderItem {
             $locked = LabOrderItem::query()->with(['test', 'labOrder'])->whereKey($item->id)->lockForUpdate()->firstOrFail();
 
             if ($locked->status === LabOrderItem::STATUS_VERIFIED) {
                 throw new \DomainException('Verified laboratory results cannot be overwritten directly. Use audited amendment.');
             }
 
-            [$flag, $isCritical] = $this->evaluateAbnormality($numericValue, $locked->ref_low, $locked->ref_high, $locked->test);
+            $resolvedText = $textValue !== null && trim($textValue) !== '' ? trim($textValue) : ($numericValue !== null ? (string) $numericValue : null);
+            [$flag, $isCritical] = $this->evaluateAbnormality($numericValue, $resolvedText, $locked->ref_low, $locked->ref_high, $locked->test);
 
             $locked->result_value_numeric = $numericValue;
-            $locked->result_value_text = $textValue !== null && trim($textValue) !== '' ? trim($textValue) : ($numericValue !== null ? (string) $numericValue : null);
+            $locked->result_value_text = $resolvedText;
             $locked->abnormal_flag = $flag;
             $locked->is_critical = $isCritical;
             $locked->result_source = $source;
             $locked->analyzer_device_code = $analyzerDeviceCode;
+            $locked->remarks = $remarks !== null && trim($remarks) !== '' ? trim($remarks) : $locked->remarks;
             $locked->status = LabOrderItem::STATUS_RESULT_ENTERED;
             $locked->entered_by_user_id = $actor?->id;
             $locked->entered_at = Carbon::now('UTC');
@@ -258,6 +296,73 @@ final class LabOrderService
             );
 
             return $locked;
+        });
+    }
+
+    /**
+     * Save multiple manual results for an entire multi-parameter lab order in one transaction.
+     *
+     * @param  array<int|string, array{numeric?: mixed, text?: mixed, remarks?: mixed}>  $entries
+     * @return array{saved: int, critical_codes: list<string>}
+     */
+    public function enterBulkResults(LabOrder $order, array $entries, User $actor): array
+    {
+        return DB::transaction(function () use ($order, $entries, $actor): array {
+            $saved = 0;
+            $criticalCodes = [];
+
+            $items = $order->items()->with('test')->where('status', '!=', LabOrderItem::STATUS_VERIFIED)->get()->keyBy('id');
+
+            foreach ($entries as $itemId => $entry) {
+                $item = $items->get((int) $itemId);
+                if ($item === null) {
+                    continue;
+                }
+
+                $rawNum = $entry['numeric'] ?? null;
+                $rawText = isset($entry['text']) ? trim((string) $entry['text']) : null;
+                $remarks = isset($entry['remarks']) ? trim((string) $entry['remarks']) : null;
+
+                $num = ($rawNum !== null && $rawNum !== '' && is_numeric($rawNum)) ? (float) $rawNum : null;
+                if ($num === null && ($rawText === null || $rawText === '')) {
+                    continue;
+                }
+
+                $updated = $this->enterResult(
+                    item: $item,
+                    numericValue: $num,
+                    textValue: $rawText,
+                    actor: $actor,
+                    source: 'manual',
+                    remarks: $remarks,
+                );
+                $saved++;
+                if ($updated->is_critical) {
+                    $criticalCodes[] = $updated->test->code;
+                }
+            }
+
+            return ['saved' => $saved, 'critical_codes' => $criticalCodes];
+        });
+    }
+
+    /**
+     * Pathologist bulk verification for all entered / tech-validated parameters in an order.
+     */
+    public function verifyOrder(LabOrder $order, User $verifier): int
+    {
+        return DB::transaction(function () use ($order, $verifier): int {
+            $candidates = $order->items()
+                ->whereIn('status', [LabOrderItem::STATUS_RESULT_ENTERED, LabOrderItem::STATUS_TECH_VALIDATED])
+                ->get();
+
+            $count = 0;
+            foreach ($candidates as $item) {
+                $this->verifyItem($item, $verifier);
+                $count++;
+            }
+
+            return $count;
         });
     }
 
@@ -374,9 +479,15 @@ final class LabOrderService
     /**
      * @return array{0: string, 1: bool}
      */
-    private function evaluateAbnormality(?float $value, ?float $refLow, ?float $refHigh, LabTestCatalog $test): array
+    private function evaluateAbnormality(?float $value, ?string $textValue, ?float $refLow, ?float $refHigh, LabTestCatalog $test): array
     {
         if ($value === null) {
+            if ($textValue !== null && $test->normal_text !== null) {
+                $isNormal = strcasecmp(trim($textValue), trim($test->normal_text)) === 0;
+
+                return [$isNormal ? 'normal' : 'abnormal', false];
+            }
+
             return ['normal', false];
         }
 

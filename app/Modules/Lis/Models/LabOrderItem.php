@@ -45,6 +45,7 @@ class LabOrderItem extends Model
         'verified_by_user_id',
         'verified_at',
         'amendment_reason',
+        'remarks',
         'version',
     ];
 

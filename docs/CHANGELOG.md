@@ -3,6 +3,17 @@
 
 All notable milestones are documented chronologically.
 
+### [0.10.0] — 2026-11-22 (Complete Hospital LIS: 58 Standard Parameters, Reporting Options, Direct Booking, Barcode Receiving & HL7 v2 Machine Integration)
+- Added dedicated seeded LIS users: `lab_tech` (`lab_technician`) and `pathologist` (`pathologist`) with direct LIS test-booking permission (`lis.order.create`).
+- Expanded `lab_test_catalog` (`2026_11_22_100001_expand_lis_parameters_and_reporting_options.php`) with `panel_code`, `panel_name`, `result_type` (`numeric` | `select` | `positive_negative` | `text`), `reporting_options` (JSON), `normal_text`, `method_name`, `price_pkr`, `display_order`, and per-item `remarks`.
+- Seeded **58 standard hospital & cardiac laboratory parameters across 11 panels** (`CARDIAC`, `CBC`, `RFT`, `LFT`, `LIPID`, `DIAB`, `COAG`, `TFT`, `BG`, `SEROLOGY`, `URINE`) with LOINC codes, UCUM units, sex-specific ranges, critical limits, qualitative reporting dropdown options, and **4 LAN HL7 v2 analyzers** (`ARCH-I1000`, `COBAS-C311`, `SYSMEX-XN550`, `STAGO-COMPACT`).
+- Upgraded `/lis` into a 4-tab LIS Workbench:
+  1. **Tests Booked & Result Entry:** Direct LIS booking with 1-click standard panel toggles, bulk manual result entry (numeric + qualitative reporting-option dropdowns + remarks), Tech Validation, and Pathologist single-item or whole-order verification (`POST /lis/orders/{order}/verify-all`).
+  2. **Sample Receiving Desk:** Barcode scanner quick-receive (`POST /lis/specimens/scan-receive`), specimen collection, and reject-and-reissue workflow.
+  3. **Automatic Machine Integration (HL7 v2):** Live LAN analyzer ingest console (`POST /lis/analyzers/ingest-ui`) with 1-click HL7 v2 ORU^R01 frame builder, SHA-256 duplicate protection, real HL7 ACK output, and automatic staging (`result_source = 'analyzer'`, never auto-verified).
+  4. **Test Catalog, Parameters & Reporting Options:** Browse all standard panels & add custom test parameters with reporting options (`POST /lis/catalog`).
+- Added printable official bilingual **Laboratory Report** (`GET /lis/orders/{order}/report`) with offline verification QR SVG, panel grouping, methodology, source badges, and Pathologist sign-off.
+
 ### [0.9.1] — 2026-11-22 (Per-Doctor Custom Tap Chips, Diagnosis Shortcuts, Instant Medicine Filter & Custom Doctor Medicines)
 - Added per-doctor persistence tables (`clinician_quick_chips`, `clinician_favorite_medications`, and `medications.added_by_user_id` / `is_hospital_formulary`) via `2026_11_22_090001_create_clinician_preferences_tables.php`.
 - Added zero-reload inline personalization inside **Rapid 60s Consult** (`/encounters/{id}/rapid`) remembered individually for every doctor:

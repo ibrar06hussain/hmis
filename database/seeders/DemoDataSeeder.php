@@ -12,7 +12,9 @@ use App\Modules\Emr\Services\ClinicalNoteService;
 use App\Modules\Emr\Services\EncounterNumberGeneratorService;
 use App\Modules\Emr\Services\VitalSignService;
 use App\Modules\Iam\Models\StaffProfile;
+use App\Modules\Lis\Models\LabTestCatalog;
 use App\Modules\Lis\Services\DiagnosticSequenceService;
+use App\Modules\Lis\Services\LabOrderService;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Organization\Models\Facility;
 use App\Modules\Pacs\Models\ImagingStudy;
@@ -45,6 +47,7 @@ class DemoDataSeeder extends Seeder
             ['name' => 'Dr. Farman Ullah', 'username' => 'ms', 'email' => 'ms@chg.demo.local', 'role' => 'medical_superintendent', 'dept' => 'ADMIN-IT', 'emp' => 'CHG-MS-001', 'designation' => 'Medical Superintendent', 'license' => 'PMDC-GB-18201'],
             ['name' => 'Riaz Ahmed (Pharmacist)', 'username' => 'pharmacist', 'email' => 'pharmacy@chg.demo.local', 'role' => 'pharmacist', 'dept' => 'PHARM', 'emp' => 'CHG-PH-001', 'designation' => 'Chief Pharmacist', 'license' => 'PC-GB-3012'],
             ['name' => 'Imran Shah (Lab Tech)', 'username' => 'lab_tech', 'email' => 'lab@chg.demo.local', 'role' => 'lab_technician', 'dept' => 'LIS', 'emp' => 'CHG-LAB-001', 'designation' => 'Senior Lab Technologist', 'license' => null],
+            ['name' => 'Dr. Yasir Abbas (Pathologist)', 'username' => 'pathologist', 'email' => 'pathologist@chg.demo.local', 'role' => 'pathologist', 'dept' => 'LIS', 'emp' => 'CHG-PATH-001', 'designation' => 'Consultant Pathologist', 'license' => 'PMDC-GB-48911'],
             ['name' => 'Dr. Nadia Karim (Radiologist)', 'username' => 'radiologist', 'email' => 'radiology@chg.demo.local', 'role' => 'radiologist', 'dept' => 'RIS', 'emp' => 'CHG-RAD-001', 'designation' => 'Consultant Radiologist', 'license' => 'PMDC-GB-51209'],
             ['name' => 'Saeed Khan (Billing)', 'username' => 'billing', 'email' => 'billing@chg.demo.local', 'role' => 'billing_officer', 'dept' => 'BILLING', 'emp' => 'CHG-BIL-001', 'designation' => 'Billing & Accounts Officer', 'license' => null],
             ['name' => 'Tariq Hussain', 'username' => 'admin', 'email' => 'admin@chg.demo.local', 'role' => 'administrator', 'dept' => 'ADMIN-IT', 'emp' => 'CHG-ADM-001', 'designation' => 'Hospital Administrator', 'license' => null],
@@ -170,6 +173,21 @@ class DemoDataSeeder extends Seeder
             'ecg_summary' => 'Normal sinus rhythm, LVH by voltage criteria, no acute ST elevation.',
         ], $consultantUser);
         app(ClinicalNoteService::class)->sign($note1, $consultantUser);
+
+        // Seed a sample booked Cardiac + Lipid + Serology lab order for LIS Workbench demonstration
+        $demoLabTestIds = LabTestCatalog::query()
+            ->whereIn('code', ['TROP-I', 'CK-MB', 'LDL', 'HBA1C', 'HB', 'PLT', 'HBSAG', 'ABO-RH'])
+            ->pluck('id')
+            ->all();
+        if ($demoLabTestIds !== []) {
+            app(LabOrderService::class)->createOrder(
+                encounter: $enc1,
+                testIds: $demoLabTestIds,
+                priority: 'urgent',
+                clinicalNotes: 'Exertional chest pain baseline cardiac & pre-cath laboratory panel',
+                actor: $consultantUser,
+            );
+        }
 
         // Synthetic Patient 2: Pediatric cardiac patient with guardian + today's OPD appointment
         $p2 = $registration->register([

@@ -136,11 +136,13 @@ class RoleAndPermissionSeeder extends Seeder
             ],
             'lab_technician' => [
                 'patient.view_demographics',
+                'lis.order.create',
                 'lis.specimen.collect',
                 'lis.result.enter',
             ],
             'pathologist' => [
                 'patient.view_demographics',
+                'lis.order.create',
                 'lis.specimen.collect',
                 'lis.result.enter',
                 'lis.result.verify',

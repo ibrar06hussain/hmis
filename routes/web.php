@@ -119,6 +119,11 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('lis')->name('lis.')->group(function (): void {
         Route::get('/', [LisWorkbenchController::class, 'index'])->name('index');
+        Route::post('/orders', [LisWorkbenchController::class, 'bookDirectOrder'])->name('orders.store');
+        Route::post('/orders/{order}/results-bulk', [LisWorkbenchController::class, 'enterBulkResults'])->name('orders.results-bulk');
+        Route::post('/orders/{order}/verify-all', [LisWorkbenchController::class, 'verifyAll'])->name('orders.verify-all');
+        Route::get('/orders/{order}/report', [LisWorkbenchController::class, 'printReport'])->name('orders.report');
+        Route::post('/specimens/scan-receive', [LisWorkbenchController::class, 'scanReceiveSpecimen'])->name('specimens.scan-receive');
         Route::post('/specimens/{specimen}/collect', [LisWorkbenchController::class, 'collectSpecimen'])->name('specimens.collect');
         Route::post('/specimens/{specimen}/receive', [LisWorkbenchController::class, 'receiveSpecimen'])->name('specimens.receive');
         Route::post('/specimens/{specimen}/reject', [LisWorkbenchController::class, 'rejectSpecimen'])->name('specimens.reject');
@@ -126,6 +131,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/items/{item}/tech-validate', [LisWorkbenchController::class, 'techValidate'])->name('items.tech-validate');
         Route::post('/items/{item}/verify', [LisWorkbenchController::class, 'verify'])->name('items.verify');
         Route::post('/items/{item}/acknowledge-critical', [LisWorkbenchController::class, 'acknowledgeCritical'])->name('items.acknowledge-critical');
+        Route::post('/analyzers/ingest-ui', [LisWorkbenchController::class, 'ingestMachineFrame'])->name('analyzers.ingest-ui');
+        Route::post('/catalog', [LisWorkbenchController::class, 'storeCatalogTest'])->name('catalog.store');
     });
 
     Route::prefix('ris')->name('ris.')->group(function (): void {

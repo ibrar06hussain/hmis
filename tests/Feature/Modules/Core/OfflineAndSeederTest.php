@@ -63,8 +63,10 @@ class OfflineAndSeederTest extends TestCase
         $this->assertNoExternalCdns((string) $ipdHtml);
 
         $labTech = User::query()->where('username', 'lab_tech')->firstOrFail();
-        $lisHtml = $this->actingAs($labTech)->get(route('lis.index'))->assertOk()->getContent();
-        $this->assertNoExternalCdns((string) $lisHtml);
+        foreach (['orders', 'receiving', 'machines', 'catalog'] as $lisTab) {
+            $lisHtml = $this->actingAs($labTech)->get(route('lis.index', ['tab' => $lisTab]))->assertOk()->getContent();
+            $this->assertNoExternalCdns((string) $lisHtml);
+        }
 
         $radiologist = User::query()->where('username', 'radiologist')->firstOrFail();
         $risHtml = $this->actingAs($radiologist)->get(route('ris.index'))->assertOk()->getContent();

@@ -25,6 +25,17 @@
                 <i class="bi bi-exclamation-triangle-fill me-1"></i>Emergency Intake (No CNIC)
             </a>
         @endcan
+        @can('viewWorkbench', \App\Modules\Lis\Models\LabOrder::class)
+            <a href="{{ route('lis.index', ['tab' => 'orders']) }}" class="btn btn-primary btn-touch fw-semibold">
+                <i class="bi bi-eyedropper me-1"></i>LIS Booked Tests &amp; Results
+            </a>
+            <a href="{{ route('lis.index', ['tab' => 'receiving']) }}" class="btn btn-success btn-touch">
+                <i class="bi bi-upc-scan me-1"></i>Sample Receiving
+            </a>
+            <a href="{{ route('lis.index', ['tab' => 'machines']) }}" class="btn btn-outline-dark btn-touch">
+                <i class="bi bi-cpu-fill me-1"></i>Machine Integration
+            </a>
+        @endcan
     </div>
 </div>
 

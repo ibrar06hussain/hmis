@@ -66,6 +66,11 @@
                     <span class="badge bg-secondary">consultant</span>
                     <span class="badge bg-secondary">mo_er</span>
                     <span class="badge bg-secondary">nurse_ccu</span>
+                    <span class="badge bg-secondary">lab_tech</span>
+                    <span class="badge bg-secondary">pathologist</span>
+                    <span class="badge bg-secondary">radiologist</span>
+                    <span class="badge bg-secondary">pharmacist</span>
+                    <span class="badge bg-secondary">billing</span>
                     <span class="badge bg-secondary">ms</span>
                     <span class="badge bg-secondary">admin</span>
                     <span class="badge bg-secondary">it_admin</span>
